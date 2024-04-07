@@ -2,3 +2,5 @@
 /demo/target/
 /device_config_manage/target/
 /test/target/
+/log/
+/.idea/
