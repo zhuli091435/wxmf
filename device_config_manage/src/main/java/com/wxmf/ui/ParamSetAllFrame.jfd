@@ -1,0 +1,64 @@
+JFDML JFormDesigner: "7.0.7.1.1184" Java: "17.0.6" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"title": "设置全部参数"
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+				"axis": 1
+			} ) {
+				name: "panel1"
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel2"
+					"preferredSize": new java.awt.Dimension( 313, 40 )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label1"
+						"text": "设备名称"
+					} )
+					add( new FormComponent( "javax.swing.JComboBox" ) {
+						name: "devComboBox"
+						"preferredSize": new java.awt.Dimension( 250, 30 )
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel4"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label2"
+						"text": "参数文件"
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "txtFileName"
+						"preferredSize": new java.awt.Dimension( 250, 30 )
+						"enabled": false
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "btnImport"
+						"text": "上传"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "btnImport", true ) )
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 2
+				} ) {
+					name: "panel3"
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "btnAddOrder"
+						"text": "新增"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "btnAddOrder", true ) )
+					} )
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 405, 335 )
+		} )
+	}
+}

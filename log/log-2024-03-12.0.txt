@@ -1,0 +1,31 @@
+2024-03-12 13:27:53,518 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1927] 客户端/87.246.7.78:63350连接成功
+2024-03-12 13:27:53,519 INFO [Thread-6] com.wxmf.ui.MainFrame [MainFrame.java : 1927] 0300002F2AE00000000000436F6F6B69653A206D737473686173683D41646D696E697374720D0A0100080003000000
+2024-03-12 14:23:59,425 INFO [Thread-6] com.wxmf.ui.MainFrame [MainFrame.java : 1927] 读取异常java.net.SocketException: Connection reset
+	at java.net.SocketInputStream.read(SocketInputStream.java:210)
+	at java.net.SocketInputStream.read(SocketInputStream.java:141)
+	at java.net.SocketInputStream.read(SocketInputStream.java:127)
+	at com.wxmf.ui.MainFrame.lambda$null$4(MainFrame.java:853)
+	at java.lang.Thread.run(Thread.java:748)
+
+2024-03-12 15:26:11,735 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-03-12 15:26:11,853 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1982] 在端口8063启动监听成功！
+2024-03-12 15:30:32,644 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:30:42,691 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:30:52,705 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:31:02,709 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:31:12,720 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:31:22,735 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:31:47,499 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-03-12 15:31:47,633 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1982] 在端口8063启动监听成功！
+2024-03-12 15:32:12,158 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:32:28,834 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:33:00,059 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:34:51,313 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-03-12 15:34:51,389 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1982] 在端口8063启动监听成功！
+2024-03-12 15:35:01,485 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:35:11,488 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:35:17,509 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-03-12 15:35:17,616 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1982] 在端口8063启动监听成功！
+2024-03-12 15:35:50,920 INFO [Thread-3] com.wxmf.ui.MainFrame [MainFrame.java : 1982] null
+2024-03-12 15:37:24,442 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-03-12 15:37:24,519 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1982] 在端口8063启动监听成功！

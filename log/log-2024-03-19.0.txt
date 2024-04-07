@@ -1,0 +1,2 @@
+2024-03-19 09:38:23,946 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-03-19 09:38:24,112 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1990] 在端口9527启动监听成功！

@@ -1,0 +1,83 @@
+JFDML JFormDesigner: "7.0.7.1.1184" Java: "17.0.6" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"title": "参数设置"
+			"defaultCloseOperation": 2
+			addEvent( new FormEvent( "java.awt.event.WindowListener", "windowOpened", "thisWindowOpened", true ) )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+				"axis": 1
+			} ) {
+				name: "panel1"
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel2"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label1"
+						"text": "设备名称"
+					} )
+					add( new FormComponent( "javax.swing.JComboBox" ) {
+						name: "devComboBox"
+						"preferredSize": new java.awt.Dimension( 250, 30 )
+						addEvent( new FormEvent( "java.awt.event.ItemListener", "itemStateChanged", "devComboBoxItemStateChanged", true ) )
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+					name: "scrollPane1"
+					"border": new javax.swing.border.TitledBorder( "参数列表" )
+					add( new FormComponent( "javax.swing.JTable" ) {
+						name: "paramTable"
+						"preferredScrollableViewportSize": new java.awt.Dimension( 750, 400 )
+						"gridColor": new java.awt.Color( 255, 153, 153, 255 )
+						"dragEnabled": true
+						"focusable": false
+						"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector, new java.util.Vector {
+							add( "序号" )
+							add( "寄存器地址" )
+							add( "参数名称" )
+							add( "上次查询时间" )
+							add( "参数值" )
+						}, new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+							add( null )
+							add( null )
+						}, new java.util.Vector {
+							add( false )
+							add( false )
+							add( false )
+							add( null )
+							add( null )
+						}, new java.util.Vector {
+							add( new com.jformdesigner.model.SwingTableColumn( null, 45, 0, 45, true ) )
+							add( new com.jformdesigner.model.SwingTableColumn( null, 80, 0, 80, true ) )
+							add( null )
+							add( null )
+							add( null )
+						} )
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 2
+				} ) {
+					name: "panel3"
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "btnAddOrder"
+						"text": "新增"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "btnAddOrder", true ) )
+					} )
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 430, 430 )
+		} )
+	}
+}

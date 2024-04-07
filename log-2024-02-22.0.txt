@@ -1,0 +1,21 @@
+2024-02-22 13:20:49,331 ERROR [main] com.wxmf.Main [Main.java : 9] error 错误信息，不会影响系统运行
+2024-02-22 13:20:49,333 WARN [main] com.wxmf.Main [Main.java : 10] warn 警告信息,可能会发生问题
+2024-02-22 13:20:49,333 INFO [main] com.wxmf.Main [Main.java : 11] info 运行信息，数据连接、网络连接、I0操作等等
+2024-02-22 13:20:49,333 DEBUG [main] com.wxmf.Main [Main.java : 12] debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+2024-02-22 16:24:47,467 ERROR [main] com.wxmf.Main [Main.java : 9] error 错误信息，不会影响系统运行
+2024-02-22 16:24:47,487 WARN [main] com.wxmf.Main [Main.java : 10] warn 警告信息,可能会发生问题
+2024-02-22 16:24:47,487 INFO [main] com.wxmf.Main [Main.java : 11] info 运行信息，数据连接、网络连接、I0操作等等
+2024-02-22 16:24:47,487 DEBUG [main] com.wxmf.Main [Main.java : 12] debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+2024-02-22 16:25:14,049 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-02-22 16:28:06,066 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-02-22 16:28:06,099 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 在端口8063启动监听成功！
+2024-02-22 16:28:15,005 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 客户端/39.144.17.135:35774连接成功
+2024-02-22 16:30:22,627 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-02-22 16:30:22,662 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 在端口8063启动监听成功！
+2024-02-22 16:30:55,043 INFO [main] c.alibaba.druid.pool.DruidDataSource [DruidDataSource.java : 1009] {dataSource-1} inited
+2024-02-22 16:30:55,079 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 在端口8063启动监听成功！
+2024-02-22 16:31:37,704 INFO [Thread-4] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 客户端/111.55.73.225:33813连接成功
+2024-02-22 16:32:23,546 INFO [Thread-5] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 开始执行203538364242500C00160012查询部分参数70指令
+2024-02-22 16:32:23,730 INFO [Thread-5] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 开始发送设备(203538364242500C00160012)70指令的第1包数据
+2024-02-22 16:32:25,126 INFO [Thread-5] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 收到设备(203538364242500C00160012)回执
+2024-02-22 16:32:25,257 INFO [Thread-5] com.wxmf.ui.MainFrame [MainFrame.java : 1652] 成功执行203538364242500C00160012查询部分参数70指令

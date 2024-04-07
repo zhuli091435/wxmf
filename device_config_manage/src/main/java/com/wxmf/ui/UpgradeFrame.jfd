@@ -1,0 +1,101 @@
+JFDML JFormDesigner: "7.0.7.1.1184" Java: "17.0.6" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"title": "升级程序"
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+				"alignment": 2
+			} ) {
+				name: "panelBottom"
+				add( new FormComponent( "javax.swing.JButton" ) {
+					name: "btnAdd"
+					"text": "添加"
+					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "btnAdd", true ) )
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Last"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class javax.swing.BoxLayout ) {
+				"axis": 1
+			} ) {
+				name: "panelCenter"
+				"preferredSize": new java.awt.Dimension( 350, 280 )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel1"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblDeviceName"
+						"text": "设备名称"
+					} )
+					add( new FormComponent( "javax.swing.JComboBox" ) {
+						name: "comboBoxDevice"
+						"preferredSize": new java.awt.Dimension( 250, 30 )
+						addEvent( new FormEvent( "java.awt.event.ItemListener", "itemStateChanged", "comboBoxDeviceItemStateChanged", true ) )
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel4"
+					"preferredSize": new java.awt.Dimension( 350, 27 )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblHardwareVersion"
+						"text": "硬件版本号："
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblHardwareVersionValue"
+						"text": "XXXXXX"
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel5"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblSystemProgramVersion"
+						"text": "系统软件版本号："
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblSystemProgramVersionValue"
+						"text": "XXXXXX"
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel6"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblApplicationVersion"
+						"text": "应用软件版本号："
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblApplicationVersionValue"
+						"text": "XXXXXXX"
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+					"alignment": 0
+				} ) {
+					name: "panel7"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblPackageVersion"
+						"text": "升级程序"
+					} )
+					add( new FormComponent( "javax.swing.JComboBox" ) {
+						name: "comboBoxPackageVersion"
+						"preferredSize": new java.awt.Dimension( 250, 30 )
+					} )
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 330, 355 )
+		} )
+	}
+}

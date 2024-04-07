@@ -1,0 +1,35 @@
+[ERROR] 2024-01-11 16:10:27.027 com.wxmf.Main main 9 main error 错误信息，不会影响系统运行
+[WARN ] 2024-01-11 16:10:27.027 com.wxmf.Main main 10 main warn 警告信息,可能会发生问题
+[INFO ] 2024-01-11 16:10:27.027 com.wxmf.Main main 11 main info 运行信息，数据连接、网络连接、I0操作等等
+[DEBUG] 2024-01-11 16:10:27.027 com.wxmf.Main main 12 main debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+[TRACE] 2024-01-11 16:10:27.027 com.wxmf.Main main 13 main trace 追踪信息，记录程序所有的流程信息
+[ERROR] 2024-01-11 16:14:15.015 com.wxmf.Main main 9 main error 错误信息，不会影响系统运行
+[WARN ] 2024-01-11 16:14:15.015 com.wxmf.Main main 10 main warn 警告信息,可能会发生问题
+[INFO ] 2024-01-11 16:14:15.015 com.wxmf.Main main 11 main info 运行信息，数据连接、网络连接、I0操作等等
+[DEBUG] 2024-01-11 16:14:15.015 com.wxmf.Main main 12 main debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+[TRACE] 2024-01-11 16:14:15.015 com.wxmf.Main main 13 main trace 追踪信息，记录程序所有的流程信息
+[ERROR] 2024-01-11 16:14:31.031 com.wxmf.Main main 9 main error 错误信息，不会影响系统运行
+[WARN ] 2024-01-11 16:14:31.031 com.wxmf.Main main 10 main warn 警告信息,可能会发生问题
+[INFO ] 2024-01-11 16:14:31.031 com.wxmf.Main main 11 main info 运行信息，数据连接、网络连接、I0操作等等
+[DEBUG] 2024-01-11 16:14:31.031 com.wxmf.Main main 12 main debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+[TRACE] 2024-01-11 16:14:31.031 com.wxmf.Main main 13 main trace 追踪信息，记录程序所有的流程信息
+[ERROR] 2024-01-31 13:13:53.053 com.wxmf.Main main 9 main error 错误信息，不会影响系统运行
+[WARN ] 2024-01-31 13:13:53.053 com.wxmf.Main main 10 main warn 警告信息,可能会发生问题
+[INFO ] 2024-01-31 13:13:53.053 com.wxmf.Main main 11 main info 运行信息，数据连接、网络连接、I0操作等等
+[DEBUG] 2024-01-31 13:13:53.053 com.wxmf.Main main 12 main debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+[TRACE] 2024-01-31 13:13:53.053 com.wxmf.Main main 13 main trace 追踪信息，记录程序所有的流程信息
+[ERROR] 2024-01-31 17:21:37.037 com.wxmf.Main main 9 main error 错误信息，不会影响系统运行
+[WARN ] 2024-01-31 17:21:37.037 com.wxmf.Main main 10 main warn 警告信息,可能会发生问题
+[INFO ] 2024-01-31 17:21:37.037 com.wxmf.Main main 11 main info 运行信息，数据连接、网络连接、I0操作等等
+[DEBUG] 2024-01-31 17:21:37.037 com.wxmf.Main main 12 main debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+[TRACE] 2024-01-31 17:21:37.037 com.wxmf.Main main 13 main trace 追踪信息，记录程序所有的流程信息
+[ERROR] 2024-01-31 17:22:18.018 com.wxmf.Main main 9 main error 错误信息，不会影响系统运行
+[WARN ] 2024-01-31 17:22:18.018 com.wxmf.Main main 10 main warn 警告信息,可能会发生问题
+[INFO ] 2024-01-31 17:22:18.018 com.wxmf.Main main 11 main info 运行信息，数据连接、网络连接、I0操作等等
+[DEBUG] 2024-01-31 17:22:18.018 com.wxmf.Main main 12 main debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+[TRACE] 2024-01-31 17:22:18.018 com.wxmf.Main main 13 main trace 追踪信息，记录程序所有的流程信息
+[ERROR] 2024-02-04 14:46:43.043 com.wxmf.Main main 9 main error 错误信息，不会影响系统运行
+[WARN ] 2024-02-04 14:46:43.043 com.wxmf.Main main 10 main warn 警告信息,可能会发生问题
+[INFO ] 2024-02-04 14:46:43.043 com.wxmf.Main main 11 main info 运行信息，数据连接、网络连接、I0操作等等
+[DEBUG] 2024-02-04 14:46:43.043 com.wxmf.Main main 12 main debug 调试信息，一般在开发中使用，记录程序变量参数传递信息等等
+[TRACE] 2024-02-04 14:46:43.043 com.wxmf.Main main 13 main trace 追踪信息，记录程序所有的流程信息
