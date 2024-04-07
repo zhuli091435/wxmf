@@ -37,6 +37,8 @@ public class App {
 //        System.out.println("Hex string: " + hexString);
 //        System.out.println("Float value: " + floatValue);
 
+//        Integer i = Integer.parseInt("A7402980", 16);
+        //Long l = Long.parseLong("A7402980", 16);
 
         //UIManager.setLookAndFeel(new FlatIntelliJLaf());
         MainFrame mainFrame = new MainFrame();

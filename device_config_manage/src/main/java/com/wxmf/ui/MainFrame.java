@@ -1403,7 +1403,7 @@ public class MainFrame extends JFrame {
             logToTextArea("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
 
             List<OrderDetail> orderDetails = orderDetailService.getOrderDetailByOrderID(deviceOrder.getID());
-            List<Integer> paramValues = new ArrayList<>();
+            List<Long> paramValues = new ArrayList<>();
 
             for (int i = 0; i < orderDetails.size(); i++) {
                 boolean b = executeQueryAllParamOrderDetail(inputStream, outputStream, orderDetails.get(i), deviceOrder, paramValues);
@@ -1481,7 +1481,7 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private boolean executeQueryAllParamOrderDetail(InputStream inputStream, OutputStream outputStream, OrderDetail orderDetail, DeviceOrder deviceOrder, List<Integer> paramValues) throws IOException, SQLException {
+    private boolean executeQueryAllParamOrderDetail(InputStream inputStream, OutputStream outputStream, OrderDetail orderDetail, DeviceOrder deviceOrder, List<Long> paramValues) throws IOException, SQLException {
 
         deviceOrder.setCurMsgIndex(deviceOrder.getCurMsgIndex() + 1);
 
@@ -1525,7 +1525,7 @@ public class MainFrame extends JFrame {
                     byte[] bytesData = wxmfProtocol.getProtocolData().getBytes();
                     int length = (bytesData.length - 3) / 4;
                     for (int i = 0; i < length; i++) {
-                        paramValues.add(Integer.parseInt(CommonUil.byteArrayToHexString(bytesData, i * 4 + 3, i * 4 + 3 + 4), 16));
+                        paramValues.add(Long.parseLong(CommonUil.byteArrayToHexString(bytesData, i * 4 + 3, i * 4 + 3 + 4), 16));
                     }
 
                     //数据发送成功
