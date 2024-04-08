@@ -1098,6 +1098,7 @@ public class MainFrame extends JFrame {
         stringBuilder.append(wxmfProtocol.getTelemetryStationAddress());
         switch (wxmfProtocol.getFunctionCode()) {
 
+            case TEST_REPORT_FUNCTION_CODE://心跳
             case TIMED_REPORT_FUNCTION_CODE://定时报
 
 
@@ -1111,6 +1112,7 @@ public class MainFrame extends JFrame {
                 try {
                     OutputStream outputStream = socket.getOutputStream();
                     outputStream.write(CommonUil.hexToByteArray(stringBuilder.toString()));
+                    logToTextArea("应答" + stringBuilder);
                 } catch (Exception e) {
                     logToTextArea(e.getMessage());
                 }
