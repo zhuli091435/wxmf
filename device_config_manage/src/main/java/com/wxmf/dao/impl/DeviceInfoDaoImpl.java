@@ -22,13 +22,13 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
 
     @Override
     public int insertDeviceInfo(DeviceInfo deviceInfo) throws SQLException {
-        String sql = "insert into DeviceInfo (DeviceName, UpdateTime, HardwareVersion, SystemProgramVersion, ApplicationVersion, ProvincesCitiesCode, DeviceAddress, BatteryVoltage, ChargingVoltage, Temperature, Humidity, Signal, IPLocation, ProjectID, DeliveryTime, InstallationTime, DeviceID, CCID, IMEI, IMSI, MSISDN, AddressEncodingFormat, HighAddress, ManageChannel, DomainName, CustomizedFeatures, ProgramName, Status, Remark) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        return queryRunner.update(sql, deviceInfo.getDeviceName(), deviceInfo.getUpdateTime(), deviceInfo.getHardwareVersion(), deviceInfo.getSystemProgramVersion(), deviceInfo.getApplicationVersion(), deviceInfo.getProvincesCitiesCode(), deviceInfo.getDeviceAddress(), deviceInfo.getBatteryVoltage(), deviceInfo.getChargingVoltage(), deviceInfo.getTemperature(), deviceInfo.getHumidity(), deviceInfo.getSignal(), deviceInfo.getIPLocation(), deviceInfo.getProjectID(), deviceInfo.getDeliveryTime(), deviceInfo.getInstallationTime(), deviceInfo.getDeviceID(), deviceInfo.getCCID(), deviceInfo.getIMEI(), deviceInfo.getIMSI(), deviceInfo.getMSISDN(), deviceInfo.getAddressEncodingFormat(), deviceInfo.getHighAddress(), deviceInfo.getManageChannel(), deviceInfo.getDomainName(), deviceInfo.getCustomizedFeatures(), deviceInfo.getProgramName(), deviceInfo.getStatus(), deviceInfo.getRemark());
+        String sql = "insert into DeviceInfo (DeviceName, UpdateTime, HardwareVersion, SystemProgramVersion, ApplicationVersion, ProvincesCitiesCode, DeviceAddress, BatteryVoltage, ChargingVoltage, Temperature, Humidity, Signal, IPLocation, ProjectID, DeliveryTime, InstallationTime, DeviceID, CCID, IMEI, IMSI, MSISDN, AddressEncodingFormat, HighAddress, ManageChannel, DomainName, CustomizedFeatures, ProgramName, Status, Remark, ICCID2, IMSI2) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return queryRunner.update(sql, deviceInfo.getDeviceName(), deviceInfo.getUpdateTime(), deviceInfo.getHardwareVersion(), deviceInfo.getSystemProgramVersion(), deviceInfo.getApplicationVersion(), deviceInfo.getProvincesCitiesCode(), deviceInfo.getDeviceAddress(), deviceInfo.getBatteryVoltage(), deviceInfo.getChargingVoltage(), deviceInfo.getTemperature(), deviceInfo.getHumidity(), deviceInfo.getSignal(), deviceInfo.getIPLocation(), deviceInfo.getProjectID(), deviceInfo.getDeliveryTime(), deviceInfo.getInstallationTime(), deviceInfo.getDeviceID(), deviceInfo.getCCID(), deviceInfo.getIMEI(), deviceInfo.getIMSI(), deviceInfo.getMSISDN(), deviceInfo.getAddressEncodingFormat(), deviceInfo.getHighAddress(), deviceInfo.getManageChannel(), deviceInfo.getDomainName(), deviceInfo.getCustomizedFeatures(), deviceInfo.getProgramName(), deviceInfo.getStatus(), deviceInfo.getRemark(), deviceInfo.getICCID2(), deviceInfo.getIMSI2());
     }
 
     @Override
     public int batchInsertDeviceInfo(List<DeviceInfo> deviceInfoList) throws SQLException {
-        Object[][] params = new Object[deviceInfoList.size()][30];
+        Object[][] params = new Object[deviceInfoList.size()][32];
 
         for (int i = 0; i < params.length; i++) {
             DeviceInfo deviceInfo = deviceInfoList.get(i);
@@ -62,6 +62,8 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
             params[i][27] = deviceInfo.getProgramName();
             params[i][28] = deviceInfo.getStatus();
             params[i][29] = deviceInfo.getRemark();
+            params[i][30] = deviceInfo.getICCID2();
+            params[i][31] = deviceInfo.getIMSI2();
         }
 
         StringBuilder wenHao = new StringBuilder();
@@ -205,6 +207,14 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
             paramBuf.append(" Remark= ? and");
             paramValueList.add(deviceInfo.getRemark());
         }
+        if (deviceInfo.getICCID2() != null) {
+            paramBuf.append(" ICCID2= ? and");
+            paramValueList.add(deviceInfo.getICCID2());
+        }
+        if (deviceInfo.getIMSI2() != null) {
+            paramBuf.append(" IMSI2= ? and");
+            paramValueList.add(deviceInfo.getIMSI2());
+        }
 
         String sql = "delete from DeviceInfo where " + paramBuf.substring(0, paramBuf.length() - 3);
         return queryRunner.update(sql, paramValueList.toArray());
@@ -229,8 +239,8 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
 
     @Override
     public int updateDeviceInfo(DeviceInfo deviceInfo) throws SQLException {
-        String sql = "update DeviceInfo set DeviceName= ? , UpdateTime= ? , HardwareVersion= ? , SystemProgramVersion= ? , ApplicationVersion= ? , ProvincesCitiesCode= ? , DeviceAddress= ? , BatteryVoltage= ? , ChargingVoltage= ? , Temperature= ? , Humidity= ? , Signal= ? , IPLocation= ? , ProjectID= ? , DeliveryTime= ? , InstallationTime= ? , DeviceID= ? , CCID= ? , IMEI= ? , IMSI= ? , MSISDN= ? , AddressEncodingFormat= ? , HighAddress= ? , ManageChannel= ? , DomainName= ? , CustomizedFeatures= ? , ProgramName= ? , Status= ? , Remark= ?  where ID = ?";
-        return queryRunner.update(sql, deviceInfo.getDeviceName(), deviceInfo.getUpdateTime(), deviceInfo.getHardwareVersion(), deviceInfo.getSystemProgramVersion(), deviceInfo.getApplicationVersion(), deviceInfo.getProvincesCitiesCode(), deviceInfo.getDeviceAddress(), deviceInfo.getBatteryVoltage(), deviceInfo.getChargingVoltage(), deviceInfo.getTemperature(), deviceInfo.getHumidity(), deviceInfo.getSignal(), deviceInfo.getIPLocation(), deviceInfo.getProjectID(), deviceInfo.getDeliveryTime(), deviceInfo.getInstallationTime(), deviceInfo.getDeviceID(), deviceInfo.getCCID(), deviceInfo.getIMEI(), deviceInfo.getIMSI(), deviceInfo.getMSISDN(), deviceInfo.getAddressEncodingFormat(), deviceInfo.getHighAddress(), deviceInfo.getManageChannel(), deviceInfo.getDomainName(), deviceInfo.getCustomizedFeatures(), deviceInfo.getProgramName(), deviceInfo.getStatus(), deviceInfo.getRemark(), deviceInfo.getID());
+        String sql = "update DeviceInfo set DeviceName= ? , UpdateTime= ? , HardwareVersion= ? , SystemProgramVersion= ? , ApplicationVersion= ? , ProvincesCitiesCode= ? , DeviceAddress= ? , BatteryVoltage= ? , ChargingVoltage= ? , Temperature= ? , Humidity= ? , Signal= ? , IPLocation= ? , ProjectID= ? , DeliveryTime= ? , InstallationTime= ? , DeviceID= ? , CCID= ? , IMEI= ? , IMSI= ? , MSISDN= ? , AddressEncodingFormat= ? , HighAddress= ? , ManageChannel= ? , DomainName= ? , CustomizedFeatures= ? , ProgramName= ? , Status= ? , Remark= ? , ICCID2= ? , IMSI2= ? where ID = ?";
+        return queryRunner.update(sql, deviceInfo.getDeviceName(), deviceInfo.getUpdateTime(), deviceInfo.getHardwareVersion(), deviceInfo.getSystemProgramVersion(), deviceInfo.getApplicationVersion(), deviceInfo.getProvincesCitiesCode(), deviceInfo.getDeviceAddress(), deviceInfo.getBatteryVoltage(), deviceInfo.getChargingVoltage(), deviceInfo.getTemperature(), deviceInfo.getHumidity(), deviceInfo.getSignal(), deviceInfo.getIPLocation(), deviceInfo.getProjectID(), deviceInfo.getDeliveryTime(), deviceInfo.getInstallationTime(), deviceInfo.getDeviceID(), deviceInfo.getCCID(), deviceInfo.getIMEI(), deviceInfo.getIMSI(), deviceInfo.getMSISDN(), deviceInfo.getAddressEncodingFormat(), deviceInfo.getHighAddress(), deviceInfo.getManageChannel(), deviceInfo.getDomainName(), deviceInfo.getCustomizedFeatures(), deviceInfo.getProgramName(), deviceInfo.getStatus(), deviceInfo.getRemark(), deviceInfo.getICCID2(), deviceInfo.getIMSI2(), deviceInfo.getID());
     }
 
     @Override
@@ -365,6 +375,14 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
             paramBuf.append(" Remark= ? and");
             paramValueList.add(deviceInfo.getRemark());
         }
+        if (deviceInfo.getICCID2() != null) {
+            paramBuf.append(" ICCID2= ? and");
+            paramValueList.add(deviceInfo.getICCID2());
+        }
+        if (deviceInfo.getIMSI2() != null) {
+            paramBuf.append(" IMSI2= ? and");
+            paramValueList.add(deviceInfo.getIMSI2());
+        }
 
         String sql = "select count(*) from DeviceInfo where " + paramBuf.substring(0, paramBuf.length() - 3);
         Long query = queryRunner.query(sql, new ScalarHandler<Long>(), paramValueList.toArray());
@@ -373,13 +391,13 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
 
     @Override
     public DeviceInfo selectDeviceInfoByID(Integer ID) throws SQLException {
-        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark from DeviceInfo where  ID = ?";
+        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark, ICCID2 as ICCID2, IMSI2 as IMSI2 from DeviceInfo where  ID = ?";
         return queryRunner.query(sql, new BeanHandler<>(DeviceInfo.class), ID);
     }
 
     @Override
     public List<DeviceInfo> selectAllDeviceInfo() throws SQLException {
-        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark from DeviceInfo";
+        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark, ICCID2 as ICCID2, IMSI2 as IMSI2 from DeviceInfo";
         return queryRunner.query(sql, new BeanListHandler<>(DeviceInfo.class));
     }
 
@@ -508,8 +526,16 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
             paramBuf.append(" Remark= ? and");
             paramValueList.add(deviceInfo.getRemark());
         }
+        if (deviceInfo.getICCID2() != null) {
+            paramBuf.append(" ICCID2= ? and");
+            paramValueList.add(deviceInfo.getICCID2());
+        }
+        if (deviceInfo.getIMSI2() != null) {
+            paramBuf.append(" IMSI2= ? and");
+            paramValueList.add(deviceInfo.getIMSI2());
+        }
 
-        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark  from DeviceInfo where " + paramBuf.substring(0, paramBuf.length() - 3);
+        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark, ICCID2 as ICCID2, IMSI2 as IMSI2  from DeviceInfo where " + paramBuf.substring(0, paramBuf.length() - 3);
         return queryRunner.query(sql, new BeanListHandler<>(DeviceInfo.class), paramValueList.toArray());
     }
 
@@ -518,7 +544,7 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
         int page = pageParam.getPage();
         int rows = pageParam.getRows();
 
-        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark from DeviceInfo limit ?, ?";
+        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark, ICCID2 as ICCID2, IMSI2 as IMSI2 from DeviceInfo limit ?, ?";
         return queryRunner.query(sql, new BeanListHandler<>(DeviceInfo.class), (page - 1) * rows, rows);
     }
 
@@ -650,8 +676,16 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
             paramBuf.append(" Remark= ? and");
             paramValueList.add(deviceInfo.getRemark());
         }
+        if (deviceInfo.getICCID2() != null) {
+            paramBuf.append(" ICCID2= ? and");
+            paramValueList.add(deviceInfo.getICCID2());
+        }
+        if (deviceInfo.getIMSI2() != null) {
+            paramBuf.append(" IMSI2= ? and");
+            paramValueList.add(deviceInfo.getIMSI2());
+        }
 
-        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark  from DeviceInfo where " + paramBuf.substring(0, paramBuf.length() - 3) + " limit ?, ?";
+        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark, ICCID2 as ICCID2, IMSI2  from DeviceInfo where " + paramBuf.substring(0, paramBuf.length() - 3) + " limit ?, ?";
 
         paramValueList.add((page - 1) * rows);
         paramValueList.add(rows);
@@ -660,7 +694,7 @@ public class DeviceInfoDaoImpl implements DeviceInfoDao {
 
     @Override
     public DeviceInfo selectDeviceInfoByDeviceID(String deviceID) throws SQLException {
-        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark from DeviceInfo where  DeviceID = ?";
+        String sql = "select ID as ID, DeviceName as DeviceName, UpdateTime as UpdateTime, HardwareVersion as HardwareVersion, SystemProgramVersion as SystemProgramVersion, ApplicationVersion as ApplicationVersion, ProvincesCitiesCode as ProvincesCitiesCode, DeviceAddress as DeviceAddress, BatteryVoltage as BatteryVoltage, ChargingVoltage as ChargingVoltage, Temperature as Temperature, Humidity as Humidity, Signal as Signal, IPLocation as IPLocation, ProjectID as ProjectID, DeliveryTime as DeliveryTime, InstallationTime as InstallationTime, DeviceID as DeviceID, CCID as CCID, IMEI as IMEI, IMSI as IMSI, MSISDN as MSISDN, AddressEncodingFormat as AddressEncodingFormat, HighAddress as HighAddress, ManageChannel as ManageChannel, DomainName as DomainName, CustomizedFeatures as CustomizedFeatures, ProgramName as ProgramName, Status as Status, Remark as Remark, ICCID2 as ICCID2, IMSI2 from DeviceInfo where  DeviceID = ?";
         return queryRunner.query(sql, new BeanHandler<>(DeviceInfo.class), deviceID);
     }
 

@@ -1270,6 +1270,12 @@ public class MainFrame extends JFrame {
                         case "07":
                             deviceInfo.setManageChannel(dataValue);
                             break;
+                        case "08":
+                            deviceInfo.setICCID2(new String(CommonUil.hexToByteArray(dataValue)));
+                            break;
+                        case "09":
+                            deviceInfo.setIMSI2(dataValue);
+                            break;
                         case "80":
                             deviceInfo.setDomainName(dataValue);
                             break;
