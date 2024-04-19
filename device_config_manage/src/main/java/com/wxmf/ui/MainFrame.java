@@ -1094,7 +1094,7 @@ public class MainFrame extends JFrame {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("F1");
         stringBuilder.append("13");
-        stringBuilder.append(wxmfProtocol.getSerialNumber());
+        stringBuilder.append(StringUtils.leftPad(Integer.toHexString(wxmfProtocol.getSerialNumber()), 2, '0').toUpperCase());
         stringBuilder.append(wxmfProtocol.getTelemetryStationAddress());
         switch (wxmfProtocol.getFunctionCode()) {
 
