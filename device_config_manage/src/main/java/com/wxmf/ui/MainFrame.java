@@ -1194,12 +1194,15 @@ public class MainFrame extends JFrame {
             timedReport.setDeviceID(deviceID);
             timedReport.setReportTime(date);
 
-            List<TimedReport> timedReportList = timedReportService.getTimedReport(timedReport);
-            if (timedReportList.size() == 0) {
+            //  List<TimedReport> timedReportList = timedReportService.getTimedReport(timedReport);
+            //  if (timedReportList.size() == 0) {
+            //
+            //      timedReport.setReportData(stringBuilder.toString());
+            //      timedReportService.addTimedReport(timedReport);
+            //  }
 
-                timedReport.setReportData(stringBuilder.toString());
-                timedReportService.addTimedReport(timedReport);
-            }
+            timedReport.setReportData(stringBuilder.toString());
+            timedReportService.addTimedReport(timedReport);
 
         } catch (Exception e) {
             //throw new RuntimeException(e);
