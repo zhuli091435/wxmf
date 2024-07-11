@@ -44,7 +44,6 @@ public class MainFrame extends JFrame {
     Logger logger = LoggerFactory.getLogger(MainFrame.class);
 
     //private final static int PORT = 9527;
-    //private final static int PORT = 9000;
     private final static int PORT = 8063;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     DeviceInfoService deviceInfoService = new DeviceInfoServiceImpl();
@@ -168,7 +167,7 @@ public class MainFrame extends JFrame {
                                 }
                                 //refreshOrderTable(deviceOrder);
                             } catch (Exception e) {
-                                logger.error(e.getMessage());
+                                logger.error(deviceOrder.getDeviceID() + "指令" + deviceOrder.getID() + "初始化失败" + e.getMessage());
                             }
                         }
                     }
@@ -1768,7 +1767,6 @@ public class MainFrame extends JFrame {
                             } else if (deviceOrder.getOrderCode().equals("91")) {
                                 saveFlowCapacityRelationship(deviceOrder, wxmfProtocol);
                             }
-
                             return true;
                         } else {
                             logger.error("设备(" + deviceOrder.getDeviceID() + ")回执功能码不匹配，继续读取");
