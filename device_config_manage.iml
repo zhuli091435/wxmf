@@ -12,8 +12,8 @@
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:3.8.1" level="project" />
-    <orderEntry type="library" name="Maven: commons-dbutils:commons-dbutils:1.8.0" level="project" />
-    <orderEntry type="library" name="Maven: com.alibaba:druid:1.2.20" level="project" />
+    <orderEntry type="library" name="Maven: commons-dbutils:commons-dbutils:1.8.1" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba:druid:1.2.23" level="project" />
     <orderEntry type="library" name="Maven: com.microsoft.sqlserver:mssql-jdbc:10.2.2.jre8" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.9.3" level="project" />
     <orderEntry type="library" name="Maven: com.formdev:flatlaf:3.2.5" level="project" />

@@ -43,9 +43,9 @@ public class MainFrame extends JFrame {
 
     Logger logger = LoggerFactory.getLogger(MainFrame.class);
 
-    private final static int PORT = 9527;
+    //private final static int PORT = 9527;
     //private final static int PORT = 9000;
-    //private final static int PORT = 8063;
+    private final static int PORT = 8063;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     DeviceInfoService deviceInfoService = new DeviceInfoServiceImpl();
 
@@ -80,7 +80,6 @@ public class MainFrame extends JFrame {
 
         //初始化指令
         startInitDeviceOrder();
-
 
         startListen();
 
@@ -121,45 +120,193 @@ public class MainFrame extends JFrame {
                     if (deviceOrders != null) {
                         for (DeviceOrder deviceOrder : deviceOrders) {
                             try {
-                                if (deviceOrder.getOrderCode().equals("65")) {
-                                    //程序升级指令
-                                    initUpgradeDeviceOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("71")) {
-                                    initQueryAllParamOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("72")) {
-                                    initSettingAllParamOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("73")) {
-                                    initQueryFewParamOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("70")) {
-                                    initQueryFewParamOrderWith70(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("74")) {
-                                    initSettingFewParamOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("F3")) {
-                                    initSettingOnlineTimeOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("75")) {
-                                    initSettingTimeOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("F6")) {
-                                    initSetManageParamOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("78")) {
-                                    //查询实时数据
-                                    initQueryRealDataOrder(deviceOrder);
-                                } else if (deviceOrder.getOrderCode().equals("79")) {
-                                    //查询历史数据
-                                    initQueryHistoryDataOrder(deviceOrder);
+                                switch (deviceOrder.getOrderCode()) {
+                                    case "65":
+                                        //程序升级指令
+                                        initUpgradeDeviceOrder(deviceOrder);
+                                        break;
+                                    case "71":
+                                        initQueryAllParamOrder(deviceOrder);
+                                        break;
+                                    case "72":
+                                        initSettingAllParamOrder(deviceOrder);
+                                        break;
+                                    case "73":
+                                        initQueryFewParamOrder(deviceOrder);
+                                        break;
+                                    case "70":
+                                        initQueryFewParamOrderWith70(deviceOrder);
+                                        break;
+                                    case "74":
+                                        initSettingFewParamOrder(deviceOrder);
+                                        break;
+                                    case "F3":
+                                        initSettingOnlineTimeOrder(deviceOrder);
+                                        break;
+                                    case "75":
+                                        initSettingTimeOrder(deviceOrder);
+                                        break;
+                                    case "F6":
+                                        initSetManageParamOrder(deviceOrder);
+                                        break;
+                                    case "78":
+                                        //查询实时数据
+                                        initQueryRealDataOrder(deviceOrder);
+                                        break;
+                                    case "79":
+                                        //查询历史数据
+                                        initQueryHistoryDataOrder(deviceOrder);
+                                        break;
+                                    case "90":
+                                        //设置RTU断面、流量、库容等关系表
+                                        initSetFlowCapacityRelationshipOrder(deviceOrder);
+                                        break;
+                                    case "91":
+                                        //查询RTU断面、流量、库容等关系表
+                                        initQueryFlowCapacityRelationshipOrder(deviceOrder);
+                                        break;
                                 }
                                 //refreshOrderTable(deviceOrder);
                             } catch (Exception e) {
-                                logToTextArea(e.getMessage());
+                                logger.error(e.getMessage());
                             }
                         }
                     }
                 } catch (Exception e) {
-                    logToTextArea(ExceptionUtil.getStackTrace(e));
+                    logger.error(ExceptionUtil.getStackTrace(e));
                 }
             }
         });
         startInitDeviceOrderThread.setDaemon(true);
         startInitDeviceOrderThread.start();
+    }
+
+    private void initQueryFlowCapacityRelationshipOrder(DeviceOrder deviceOrder) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("F1030000000000");
+        //报文长度
+        sb.append(StringUtils.leftPad(Integer.toHexString(12), 4, '0').toUpperCase());
+        //功能码
+        sb.append("91");
+
+        //和校验
+        sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
+        //结束符
+        sb.append("F2");
+
+        try {
+            deviceOrder.setCurMsgIndex(0);
+            deviceOrder.setTotalMsgCount(1);
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderID(deviceOrder.getID());
+            orderDetail.setCurPackageNumber(1);
+            orderDetail.setTotalPackageNumber(1);
+            orderDetail.setMsgType("91");
+            orderDetail.setMsgContent(sb.toString());
+            orderDetail.setMsgState(0);
+            orderDetail.setExecuteCount(0);
+            orderDetail.setSort(deviceOrder.getTotalMsgCount());
+            orderDetailService.addOrderDetail(orderDetail);
+
+            deviceOrder.setOrderState(DeviceOrder.UNEXECUTED);
+            deviceOrder.setRemark("初始化成功");
+            deviceOrderService.updateDeviceOrder(deviceOrder);
+        } catch (SQLException ex) {
+            try {
+                modifyOrderInfo(deviceOrder, "指令初始化，添加查询实时数据指令失败!");
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+            logger.error(ex.getMessage());
+        }
+    }
+
+    private void initSetFlowCapacityRelationshipOrder(DeviceOrder deviceOrder) throws SQLException {
+        DeviceInfo deviceInfo = deviceInfoService.getDeviceInfoByDeviceID(deviceOrder.getDeviceID());
+
+        if (deviceInfo == null) {
+            return;
+        }
+
+        FileReader fileReader = null;
+        BufferedReader bufferedReader = null;
+        try {
+
+            fileReader = new FileReader(deviceOrder.getParameter());
+            bufferedReader = new BufferedReader(fileReader);
+            String line;
+            StringBuilder sbData = new StringBuilder();
+
+            int count = 0;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (!line.equals("")) {
+                    String[] split = line.split("\t");
+                    if (split.length == 3) {
+                        count++;
+                        sbData.append(StringUtils.leftPad(Integer.toHexString(Integer.parseInt(split[1])), 8, '0').toUpperCase());
+                        sbData.append(StringUtils.leftPad(Integer.toHexString(Integer.parseInt(split[2])), 8, '0').toUpperCase());
+                    }
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            //起始符 特征码  流水号 遥测站地址    7字节
+            sb.append("F1030000000000");//
+            //报文长度 2字节
+            sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 8 * count), 4, '0').toUpperCase());
+            //功能码 1字节
+            sb.append("90");
+
+            //数据域
+            sb.append(StringUtils.leftPad(Integer.toHexString(count), 2, '0').toUpperCase());
+            sb.append(sbData);
+
+            //和校验
+            sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
+            //结束符
+            sb.append("F2");
+
+
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderID(deviceOrder.getID());
+            orderDetail.setCurPackageNumber(1);
+            orderDetail.setTotalPackageNumber(1);
+            orderDetail.setMsgType("90");
+            orderDetail.setMsgContent(sb.toString());
+            orderDetail.setMsgState(0);
+            orderDetail.setExecuteCount(0);
+            orderDetail.setSort(0);
+            orderDetailService.addOrderDetail(orderDetail);
+
+            deviceOrder.setCurMsgIndex(0);
+            deviceOrder.setTotalMsgCount(1);
+            deviceOrder.setOrderState(DeviceOrder.UNEXECUTED);
+            deviceOrder.setRemark("初始化成功");
+            deviceOrderService.updateDeviceOrder(deviceOrder);
+
+            bufferedReader.close();
+            fileReader.close();
+
+        } catch (IOException ex) {
+            //throw new RuntimeException(ex);
+
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException exc) {
+                    //throw new RuntimeException(exc);
+                }
+            }
+            if (fileReader != null) {
+                try {
+                    fileReader.close();
+                } catch (IOException exc) {
+                    //throw new RuntimeException(exc);
+                }
+            }
+        } catch (SQLException e) {
+            //throw new RuntimeException(e);
+        }
     }
 
     private void initQueryHistoryDataOrder(DeviceOrder deviceOrder) {
@@ -199,9 +346,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加查询实时数据指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -239,9 +386,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加查询实时数据指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -293,9 +440,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加设置运维平台参数指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -323,9 +470,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加设置单个参数指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -370,9 +517,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加设置单个参数指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -494,9 +641,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加设置单个参数指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -551,9 +698,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加设置单个参数指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -939,9 +1086,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加设置单个参数指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -979,12 +1126,12 @@ public class MainFrame extends JFrame {
             try {
                 //开始监听
                 serverSocket = new ServerSocket(PORT);
-                logToTextArea("在端口" + PORT + "启动监听成功！");
+                logger.info("在端口" + PORT + "启动监听成功！");
                 while (true) {
                     //等待设备连接
                     Socket socket = serverSocket.accept();
                     //设备连接服务器成功
-                    logToTextArea("客户端" + socket.getRemoteSocketAddress() + "连接成功");
+                    logger.info("客户端" + socket.getRemoteSocketAddress() + "连接成功");
 
                     //开启新线程处理设备数据的接收发送
                     handleClient(socket);
@@ -992,7 +1139,7 @@ public class MainFrame extends JFrame {
             } catch (Exception e) {
 
                 //
-                logToTextArea("在端口" + PORT + "启动监听失败，" + ExceptionUtil.getStackTrace(e));
+                logger.error("在端口" + PORT + "启动监听失败，" + ExceptionUtil.getStackTrace(e));
                 //关闭ServerSocket
                 if (serverSocket != null) {
                     try {
@@ -1029,15 +1176,15 @@ public class MainFrame extends JFrame {
                         handleMsg(dataBytes, socket);
 
                     } catch (Exception ex) {
-                        logToTextArea("handleMsg发生错误，" + ExceptionUtil.getStackTrace(ex));
+                        logger.error("handleMsg发生错误，" + ExceptionUtil.getStackTrace(ex));
                     }
                 }
 
                 inputStream.close();
                 socket.close();
-                logToTextArea("客户端" + socket.getRemoteSocketAddress() + "下线");
+                logger.info("客户端" + socket.getRemoteSocketAddress() + "下线");
             } catch (Exception e) {
-                logToTextArea("读取异常" + e.getMessage());
+                logger.error("读取异常" + e.getMessage());
                 try {
                     if (inputStream != null) {
                         inputStream.close();
@@ -1059,14 +1206,14 @@ public class MainFrame extends JFrame {
             OutputStream outputStream = socket.getOutputStream();
             outputStream.write(sendBytes);
         } catch (IOException e) {
-            logToTextArea(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 
     private void handleMsg(byte[] dataBytes, Socket socket) throws Exception {
 
         String msg = CommonUil.byteArrayToHexString(dataBytes);
-        logToTextArea(msg);
+        logger.info(msg);
 
         //F31401000032E00050880101240229123009203538364242500C0016001229660042800020028000883200000002000032E00076000000FA321AFFFF240229123005010281100000000000000000FEF4
         //解析协议
@@ -1112,9 +1259,9 @@ public class MainFrame extends JFrame {
                 try {
                     OutputStream outputStream = socket.getOutputStream();
                     outputStream.write(CommonUil.hexToByteArray(stringBuilder.toString()));
-                    logToTextArea("应答" + stringBuilder);
+                    logger.error("应答" + stringBuilder);
                 } catch (Exception e) {
-                    logToTextArea(e.getMessage());
+                    logger.error(e.getMessage());
                 }
                 break;
             case HEARTBEAT_FUNCTION_CODE://心跳
@@ -1129,7 +1276,7 @@ public class MainFrame extends JFrame {
                     OutputStream outputStream = socket.getOutputStream();
                     outputStream.write(CommonUil.hexToByteArray(stringBuilder.toString()));
                 } catch (Exception e) {
-                    logToTextArea(e.getMessage());
+                    logger.error(e.getMessage());
                 }
                 break;
         }
@@ -1206,7 +1353,7 @@ public class MainFrame extends JFrame {
 
         } catch (Exception e) {
             //throw new RuntimeException(e);
-            logToTextArea(e.getMessage());
+            logger.error(e.getMessage());
         }
 
     }
@@ -1301,7 +1448,7 @@ public class MainFrame extends JFrame {
             }
             reFreshDeviceTable(deviceInfo);
         } catch (Exception e) {
-            logToTextArea(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 
@@ -1357,13 +1504,13 @@ public class MainFrame extends JFrame {
                         }
                     } catch (Exception e) {
                         //throw new RuntimeException(e);
-                        logToTextArea("执行指令发生异常," + e.getMessage());
+                        logger.error("执行指令发生异常," + e.getMessage());
                     }
                 }
                 socket.setSoTimeout(120000);
             }
         } catch (Exception e) {
-            logToTextArea(e.getMessage());
+            logger.error(e.getMessage());
             //throw new RuntimeException(e);
         }
     }
@@ -1373,7 +1520,7 @@ public class MainFrame extends JFrame {
         try {
             deviceOrder.setBeginExecuteTime(new Date());
             //logger.trace("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
-            logToTextArea("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+            logger.info("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
             List<OrderDetail> orderDetails = orderDetailService.getOrderDetailByOrderID(deviceOrder.getID(), OrderDetail.UNEXECUTED);
 
             for (int i = 0; i < orderDetails.size(); i++) {
@@ -1383,7 +1530,10 @@ public class MainFrame extends JFrame {
                     deviceOrder.setCompleteTime(new Date());
                     deviceOrder.setRemark("执行失败，已达最大尝试发送次数");
                     deviceOrderService.updateDeviceOrder(deviceOrder);
-                    logToTextArea("失败执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+                    logger.info("失败执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrderID(deviceOrder.getID());
+                    orderDetailService.deleteOrderDetail(orderDetail);
                     refreshOrderTable(deviceOrder);
                     return;
                 }
@@ -1393,17 +1543,24 @@ public class MainFrame extends JFrame {
                 }
             }
 
+
             deviceOrder.setOrderState(DeviceOrder.SUCCEED);
             deviceOrder.setRemark("指令执行成功！");
             deviceOrder.setCompleteTime(new Date());
             deviceOrderService.updateDeviceOrder(deviceOrder);
-            logToTextArea("成功执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderID(deviceOrder.getID());
+            orderDetailService.deleteOrderDetail(orderDetail);
+
+            logger.info("成功执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
             refreshOrderTable(deviceOrder);
         } catch (Exception e) {
-            logToTextArea("执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + "指令发生错误," + e.getMessage());
+            logger.error("执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + "指令发生错误," + e.getMessage());
             //throw new RuntimeException(e);
         }
     }
+
 
     private void executeQueryAllParamOrder(OutputStream outputStream, InputStream inputStream, DeviceOrder deviceOrder) {
         FileWriter fileWriter = null;
@@ -1411,7 +1568,7 @@ public class MainFrame extends JFrame {
         try {
             deviceOrder.setBeginExecuteTime(new Date());
 
-            logToTextArea("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+            logger.info("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
 
             List<OrderDetail> orderDetails = orderDetailService.getOrderDetailByOrderID(deviceOrder.getID());
             List<Long> paramValues = new ArrayList<>();
@@ -1423,7 +1580,11 @@ public class MainFrame extends JFrame {
                     deviceOrder.setRemark("执行失败，已达最大尝试发送次数");
                     deviceOrderService.updateDeviceOrder(deviceOrder);
 
-                    logToTextArea("失败执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrderID(deviceOrder.getID());
+                    orderDetailService.deleteOrderDetail(orderDetail);
+
+                    logger.info("失败执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
                     refreshOrderTable(deviceOrder);
                     return;
                 }
@@ -1471,10 +1632,14 @@ public class MainFrame extends JFrame {
             deviceOrder.setOrderResult(fileName);
             deviceOrderService.updateDeviceOrder(deviceOrder);
 
-            logToTextArea("成功执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderID(deviceOrder.getID());
+            orderDetailService.deleteOrderDetail(orderDetail);
+
+            logger.info("成功执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
             refreshOrderTable(deviceOrder);
         } catch (Exception e) {
-            logToTextArea("执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + "指令发生错误," + e.getMessage() + ExceptionUtil.getStackTrace(e));
+            logger.error("执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + "指令发生错误," + e.getMessage() + ExceptionUtil.getStackTrace(e));
             if (bufferedWriter != null) {
                 try {
                     bufferedWriter.close();
@@ -1500,7 +1665,7 @@ public class MainFrame extends JFrame {
         while (orderDetail.getExecuteCount() < 10) {
             //发送次数加1
             orderDetail.setExecuteCount(orderDetail.getExecuteCount() + 1);
-            logToTextArea("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据");
+            logger.info("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据");
             byte[] sendBytes = CommonUil.hexToByteArray(orderDetail.getMsgContent());
             outputStream.write(sendBytes);
 
@@ -1510,18 +1675,18 @@ public class MainFrame extends JFrame {
                     byte[] bytes = new byte[1024];
                     int len = inputStream.read(bytes);
                     byte[] dataBytes = Arrays.copyOf(bytes, len);
-                    logToTextArea("收到设备(" + deviceOrder.getDeviceID() + CommonUil.byteArrayToHexString(dataBytes) + ")回执");
+                    logger.info("收到设备(" + deviceOrder.getDeviceID() + CommonUil.byteArrayToHexString(dataBytes) + ")回执");
                     wxmfProtocol = WXMFProtocolUtil.createWXMFProtocol(dataBytes);
                     break;
                 } catch (SocketTimeoutException e) {
                     //读取超时，尝试下次发送数据
-                    logToTextArea("设备(" + deviceOrder.getDeviceID() + ")读取超时，尝试下次发送数据");
+                    logger.error("设备(" + deviceOrder.getDeviceID() + ")读取超时，尝试下次发送数据");
                     break;
                 } catch (IOException e) {
-                    logToTextArea("设备(" + e.getMessage() + ")读取异常");
+                    logger.error("设备(" + e.getMessage() + ")读取异常");
                     throw new RuntimeException(e);
                 } catch (Exception e) {
-                    logToTextArea("设备(" + ExceptionUtil.getStackTrace(e) + ")解析异常");
+                    logger.error("设备(" + ExceptionUtil.getStackTrace(e) + ")解析异常");
                     //不是后台协议，继续读取
                     throw new RuntimeException(e);
                 }
@@ -1566,7 +1731,7 @@ public class MainFrame extends JFrame {
 
 
             orderDetail.setExecuteCount(orderDetail.getExecuteCount() + 1);
-            logToTextArea("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据");
+            logger.info("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据");
             if (deviceOrder.getOrderCode().equals("75")) {
 
                 orderDetail.setMsgContent(initSetTimeMsgContent());
@@ -1581,7 +1746,7 @@ public class MainFrame extends JFrame {
                     byte[] bytes = new byte[1024];
                     int len = inputStream.read(bytes);
                     byte[] dataBytes = Arrays.copyOf(bytes, len);
-                    logToTextArea("收到设备(" + deviceOrder.getDeviceID() + ")回执");
+                    logger.info("收到设备(" + deviceOrder.getDeviceID() + ")回执，" + CommonUil.byteArrayToHexString(dataBytes));
                     //System.out.println(CommonUil.byteArrayToHexString(dataBytes));
                     WXMFProtocol wxmfProtocol = WXMFProtocolUtil.createWXMFProtocol(dataBytes);
 
@@ -1600,23 +1765,27 @@ public class MainFrame extends JFrame {
                                 saveFewParameterWith70(deviceOrder, wxmfProtocol);
                             } else if (deviceOrder.getOrderCode().equals("78")) {
                                 saveRealData(deviceOrder, wxmfProtocol);
+                            } else if (deviceOrder.getOrderCode().equals("91")) {
+                                saveFlowCapacityRelationship(deviceOrder, wxmfProtocol);
                             }
 
                             return true;
                         } else {
-                            logToTextArea("设备(" + deviceOrder.getDeviceID() + ")回执功能码不匹配，继续读取");
+                            logger.error("设备(" + deviceOrder.getDeviceID() + ")回执功能码不匹配，继续读取");
                         }
+                    } else {
+                        logger.error("设备(" + deviceOrder.getDeviceID() + ")回执执行失败");
                     }
                     break;
                 } catch (SocketTimeoutException e) {
                     //读取超时，尝试下次发送数据
-                    logToTextArea("设备(" + deviceOrder.getDeviceID() + ")读取超时，尝试下次发送数据");
+                    logger.error("设备(" + deviceOrder.getDeviceID() + ")读取超时，尝试下次发送数据");
                     break;
                 } catch (IOException e) {
-                    logToTextArea("设备(" + e.getMessage() + ")读取异常");
+                    logger.error("设备(" + e.getMessage() + ")读取异常");
                     throw new RuntimeException(e);
                 } catch (Exception e) {
-                    logToTextArea("设备(" + ExceptionUtil.getStackTrace(e) + ")解析异常");
+                    logger.error("设备(" + ExceptionUtil.getStackTrace(e) + ")解析异常");
                     //不是后台协议，继续读取
                     throw new RuntimeException(e);
                 }
@@ -1631,6 +1800,55 @@ public class MainFrame extends JFrame {
         orderDetailService.updateOrderDetail(orderDetail);
 
         return false;
+    }
+
+    private void saveFlowCapacityRelationship(DeviceOrder deviceOrder, WXMFProtocol wxmfProtocol) {
+        FileWriter fileWriter = null;
+        BufferedWriter bufferedWriter = null;
+        try {
+
+            String fileName = "exportFile/" + deviceOrder.getDeviceID() + "_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".txt";
+            fileWriter = new FileWriter(fileName);
+            bufferedWriter = new BufferedWriter(fileWriter);
+
+            byte[] bytesData = wxmfProtocol.getProtocolData().getBytes();
+            //1个字节断面总折点数（最多63个，一个折点8个字节）+8*N字节数据
+            //（水位面积：其中前4字节是水位0.01m，后4字节面积单位0.01m2）
+            //（水位流量：其中前4字节是水位0.01m，后4字节流量单位0.001m3/s）
+            int amount = bytesData[0] & 0xFF;
+            for (int i = 0; i < amount; i++) {
+                //数值
+                long water = Long.parseLong(CommonUil.byteArrayToHexString(bytesData, i * 8 + 1, i * 8 + 5), 16);
+                long flowCapacity = Long.parseLong(CommonUil.byteArrayToHexString(bytesData, i * 8 + 5, i * 8 + 9), 16);
+
+                bufferedWriter.write((i + 1) + "\t" + water + "\t" + flowCapacity);
+                bufferedWriter.newLine();
+            }
+
+            bufferedWriter.flush();
+
+            bufferedWriter.close();
+            fileWriter.close();
+
+            deviceOrder.setOrderResult(fileName);
+
+        } catch (Exception ex) {
+            logger.error("saveFlowCapacityRelationship发生异常," + ex.getMessage());
+            if (bufferedWriter != null) {
+                try {
+                    bufferedWriter.close();
+                } catch (IOException e) {
+                    //throw new RuntimeException(ex);
+                }
+            }
+            if (fileWriter != null) {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    //
+                }
+            }
+        }
     }
 
     /**
@@ -1691,7 +1909,7 @@ public class MainFrame extends JFrame {
 
         } catch (Exception ex) {
 
-            logToTextArea("saveFewParameterWith70发生异常," + ex.getMessage());
+            logger.error("saveFewParameterWith70发生异常," + ex.getMessage());
         }
     }
 
@@ -1852,7 +2070,7 @@ public class MainFrame extends JFrame {
 
         } catch (Exception ex) {
 
-            logToTextArea("saveFewParameterWith70发生异常," + ex.getMessage());
+            logger.error("saveFewParameterWith70发生异常," + ex.getMessage());
         }
 
     }
@@ -1930,9 +2148,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化失败!");
             } catch (Exception e) {
-                logToTextArea(ex.getMessage());
+                logger.error(ex.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
 
         return false;
@@ -1960,9 +2178,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加更新应用程序指令失败!");
             } catch (Exception e) {
-                logToTextArea(ex.getMessage());
+                logger.error(ex.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
 
         return false;
@@ -1983,9 +2201,9 @@ public class MainFrame extends JFrame {
                 }
                 modifyOrderInfo(deviceOrder, "指令初始化，添加写数据指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(deviceOrder + "指令初始化，添加写数据指令失败!，" + ex.getMessage());
+            logger.error(deviceOrder + "指令初始化，添加写数据指令失败!，" + ex.getMessage());
 
             return null;
         }
@@ -2033,9 +2251,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加校验缓冲区指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
 
         return false;
@@ -2087,9 +2305,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加写数据指令失败!");
             } catch (Exception e) {
-                logToTextArea(ex.getMessage());
+                logger.error(ex.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
         return false;
     }
@@ -2127,9 +2345,9 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加格式化缓冲区指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
         return false;
     }
@@ -2157,18 +2375,13 @@ public class MainFrame extends JFrame {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加获取设备信息指令失败!");
             } catch (Exception e) {
-                logToTextArea(e.getMessage());
+                logger.error(e.getMessage());
             }
-            logToTextArea(ex.getMessage());
+            logger.error(ex.getMessage());
         }
         return false;
     }
 
-
-    private void logToTextArea(String msg) {
-        //this.logTextArea.append("\n" + simpleDateFormat.format(new Date()) + "：" + msg);
-        logger.info(msg);
-    }
 
     private void thisWindowOpened(WindowEvent e) {
         // TODO add your code here
@@ -2299,7 +2512,7 @@ public class MainFrame extends JFrame {
                 model.removeRow(selectedRow);
                 deviceOrderService.deleteDeviceOrderByID(orderId);
             } catch (SQLException ex) {
-                logToTextArea(ex.getMessage());
+                logger.error(ex.getMessage());
             }
         }
     }

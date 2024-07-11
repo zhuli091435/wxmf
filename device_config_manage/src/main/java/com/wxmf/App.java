@@ -30,25 +30,9 @@ import static jdk.nashorn.internal.objects.NativeMath.sin;
  */
 public class App {
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
-
-//        String hexString = "414E6666"; // 以IEEE 754标准表示的十六进制浮点数
-//        int intValue = Integer.parseInt(hexString, 16); // 将十六进制字符串转换为十进制整数
-//        float floatValue = Float.intBitsToFloat(intValue); // 将整数转换为浮点数
-//        System.out.println("Hex string: " + hexString);
-//        System.out.println("Float value: " + floatValue);
-
-//        Integer i = Integer.parseInt("A7402980", 16);
-        //Long l = Long.parseLong("A7402980", 16);
-
-        //UIManager.setLookAndFeel(new FlatIntelliJLaf());
         MainFrame mainFrame = new MainFrame();
         mainFrame.setVisible(true);
-
-        //String msg = "7E7E000001000002000032002602461C240407105802F1F100010000025AF0F02404071058091BFFFFFFA120000624C83812122103F5EB";
-        //WXMFProtocol wxmfProtocol = WXMFProtocolUtil.createWXMFProtocol(CommonUil.hexToByteArray(msg));
     }
-
-
 }
 
 
