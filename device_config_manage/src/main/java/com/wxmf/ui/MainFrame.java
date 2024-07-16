@@ -547,7 +547,6 @@ public class MainFrame extends JFrame {
                 if (list.get(0).getParamType() == 2) {
                     //正负数据类  有效数据位包含符号位 暂未处理
                     //endBit = 31;
-
                 }
 
                 StringBuilder sbParamBit = new StringBuilder();
@@ -937,7 +936,7 @@ public class MainFrame extends JFrame {
 
     private void initSettingFewParamOrder(DeviceOrder deviceOrder) throws SQLException {
 
-        List<DeviceParameter> allDeviceParameter = deviceParameterService.getAllDeviceParameter();
+        //List<DeviceParameter> allDeviceParameter = deviceParameterService.getDeviceParameterByID();
 
         String[] params = deviceOrder.getParameter().split(";");
 
@@ -946,21 +945,21 @@ public class MainFrame extends JFrame {
         StringBuilder sbParam = new StringBuilder();
         for (String param : params) {
             String[] split = param.split("=");
-            List<DeviceParameter> parameterList = allDeviceParameter.stream().filter(o -> o.getID() == Integer.parseInt(split[0])).collect(Collectors.toList());
-            if (parameterList.size() > 0) {
-
+            //List<DeviceParameter> parameterList = allDeviceParameter.stream().filter(o -> o.getID() == Integer.parseInt(split[0])).collect(Collectors.toList());
+            DeviceParameter parameter = deviceParameterService.getDeviceParameterByID(Integer.parseInt(split[0]));
+            if (parameter != null) {
                 //2字节参数地址
-                sbParam.append(StringUtils.leftPad(Integer.toHexString(parameterList.get(0).getRegisterAddress()), 4, '0').toUpperCase());
+                sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress()), 4, '0').toUpperCase());
 
                 StringBuilder sbParamBit = new StringBuilder();
-                Integer endBit = parameterList.get(0).getEndBit();
-                if (parameterList.get(0).getParamType() == 2) {
+                Integer endBit = parameter.getEndBit();
+                if (parameter.getParamType() == 2) {
                     //正负数据类
                     endBit = 31;
                 }
                 for (int i = 31; i >= 0; i--) {
                     //
-                    if (i >= parameterList.get(0).getStartBit() && i <= endBit) {
+                    if (i >= parameter.getStartBit() && i <= endBit) {
                         sbParamBit.append("1");
                     } else {
                         sbParamBit.append("0");
@@ -972,72 +971,72 @@ public class MainFrame extends JFrame {
                 sbParam.append(hexStr);
 
                 //IP地址
-                if (isIP(parameterList.get(0).getRegisterAddress())) {
+                if (isIP(parameter.getRegisterAddress())) {
                     String[] ipArr = split[2].split("\\.");
                     if (ipArr.length == 4) {
                         //4字节参数值
                         String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[0])), 8, '0');
                         strBin += StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[1])), 8, '0');
 
-                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameterList.get(0).getStartBit(), '0');
+                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
                         strBin = StringUtils.leftPad(strBin, 32, '0');
                         sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
                         paramLength++;
 
 
                         //2字节参数地址
-                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameterList.get(0).getRegisterAddress() + 1), 4, '0').toUpperCase());
+                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 1), 4, '0').toUpperCase());
                         //4字节有效参数位
                         sbParam.append(hexStr);
                         //4字节参数值
                         strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[2])), 8, '0');
                         strBin += StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[3])), 8, '0');
-                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameterList.get(0).getStartBit(), '0');
+                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
                         strBin = StringUtils.leftPad(strBin, 32, '0');
                         sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
                         paramLength++;
 
                     }
-                } else if (isPhone(parameterList.get(0).getRegisterAddress())) {
+                } else if (isPhone(parameter.getRegisterAddress())) {
                     //4字节参数值
                     String high = split[2].substring(0, split[2].length() - 8);
                     String low = split[2].substring(split[2].length() - 8);
 
-                    String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(high)), parameterList.get(0).getEndBit() - parameterList.get(0).getStartBit() + 1, '0');
-                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameterList.get(0).getStartBit(), '0');
+                    String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(high)), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
+                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
                     strBin = StringUtils.leftPad(strBin, 32, '0');
                     sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
                     paramLength++;
 
                     //2字节参数地址
-                    if (parameterList.get(0).getRegisterAddress() == 364) {
-                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameterList.get(0).getRegisterAddress() + 1), 4, '0').toUpperCase());
+                    if (parameter.getRegisterAddress() == 364) {
+                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 1), 4, '0').toUpperCase());
                     } else {
-                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameterList.get(0).getRegisterAddress() + 4), 4, '0').toUpperCase());
+                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 4), 4, '0').toUpperCase());
                     }
 
                     //4字节有效参数位
                     sbParam.append(hexStr);
 
-                    strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(low)), parameterList.get(0).getEndBit() - parameterList.get(0).getStartBit() + 1, '0');
-                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameterList.get(0).getStartBit(), '0');
+                    strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(low)), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
+                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
                     strBin = StringUtils.leftPad(strBin, 32, '0');
                     sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
                     paramLength++;
 
-                } else if (parameterList.get(0).getParamType() == 2) {//
-                    //设置APN接入点
+                } else if (parameter.getParamType() == 2) {//
+                    //
                     StringBuilder sb = new StringBuilder();
                     int paramValue = Integer.parseInt(split[2]);
                     if (paramValue > 0) {
                         //
                         //24 到 31位是符号位，0=正，非0=负，正负数据类--填写数据
-                        for (int i = 0; i < 31 - parameterList.get(0).getEndBit(); i++) {
+                        for (int i = 0; i < 31 - parameter.getEndBit(); i++) {
                             sb.append("0");
                         }
                     } else {
-                        for (int i = 0; i < 31 - parameterList.get(0).getEndBit(); i++) {
-                            if (i == 31 - parameterList.get(0).getEndBit() - 1) {
+                        for (int i = 0; i < 31 - parameter.getEndBit(); i++) {
+                            if (i == 31 - parameter.getEndBit() - 1) {
                                 sb.append("1");
                             } else {
                                 sb.append("0");
@@ -1045,7 +1044,7 @@ public class MainFrame extends JFrame {
                         }
                     }
                     paramValue = Math.abs(paramValue);
-                    String strBin = StringUtils.leftPad(Integer.toBinaryString(paramValue), parameterList.get(0).getEndBit() - parameterList.get(0).getStartBit() + 1, '0');
+                    String strBin = StringUtils.leftPad(Integer.toBinaryString(paramValue), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
 
                     strBin = sb + strBin;
                     sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
@@ -1054,9 +1053,9 @@ public class MainFrame extends JFrame {
 
                     int value = parseInt(split[2]);
                     //4字节参数值
-                    String strBin = StringUtils.leftPad(Integer.toBinaryString(value), parameterList.get(0).getEndBit() - parameterList.get(0).getStartBit() + 1, '0');
+                    String strBin = StringUtils.leftPad(Integer.toBinaryString(value), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
 
-                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameterList.get(0).getStartBit(), '0');
+                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
 
                     strBin = StringUtils.leftPad(strBin, 32, '0');
                     sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
@@ -2016,7 +2015,13 @@ public class MainFrame extends JFrame {
                 DeviceParameter deviceParameter = new DeviceParameter();
                 deviceParameter.setRegisterAddress(registerAddress);
                 deviceParameter.setStartBit(startBit);
-                //deviceParameter.setEndBit(endBit);
+                deviceParameter.setEndBit(endBit);
+                if (wxmfProtocol.getProtocolData().getHardwareVersion().endsWith("1")) {
+                    deviceParameter.setChannelAmount("16");
+                } else {
+                    deviceParameter.setChannelAmount("32");
+                }
+
                 List<DeviceParameter> deviceParameters = deviceParameterService.getDeviceParameter(deviceParameter);
 
                 //|| registerAddress == 299 || registerAddress == 330|| registerAddress == 333 || registerAddress == 336

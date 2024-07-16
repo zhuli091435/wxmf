@@ -22,13 +22,13 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
 
     @Override
     public int insertDeviceParameter(DeviceParameter deviceParameter) throws SQLException {
-        String sql = "insert into DeviceParameter (ID, ParamName, ParamLength, DecimalPlaces, Unit, MinValue, MaxValue, RegisterAddress, StartBit, EndBit, Symbol, ParamType, Category, Remark) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        return queryRunner.update(sql, deviceParameter.getID(), deviceParameter.getParamName(), deviceParameter.getParamLength(), deviceParameter.getDecimalPlaces(), deviceParameter.getUnit(), deviceParameter.getMinValue(), deviceParameter.getMaxValue(), deviceParameter.getRegisterAddress(), deviceParameter.getStartBit(), deviceParameter.getEndBit(), deviceParameter.getSymbol(), deviceParameter.getParamType(), deviceParameter.getCategory(), deviceParameter.getRemark());
+        String sql = "insert into DeviceParameter (ID, ParamName, ParamLength, DecimalPlaces, Unit, MinValue, MaxValue, RegisterAddress, StartBit, EndBit, Symbol, ParamType, Category, Remark, ChannelAmount) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return queryRunner.update(sql, deviceParameter.getID(), deviceParameter.getParamName(), deviceParameter.getParamLength(), deviceParameter.getDecimalPlaces(), deviceParameter.getUnit(), deviceParameter.getMinValue(), deviceParameter.getMaxValue(), deviceParameter.getRegisterAddress(), deviceParameter.getStartBit(), deviceParameter.getEndBit(), deviceParameter.getSymbol(), deviceParameter.getParamType(), deviceParameter.getCategory(), deviceParameter.getRemark(), deviceParameter.getChannelAmount());
     }
 
     @Override
     public int batchInsertDeviceParameter(List<DeviceParameter> deviceParameterList) throws SQLException {
-        Object[][] params = new Object[deviceParameterList.size()][14];
+        Object[][] params = new Object[deviceParameterList.size()][15];
 
         for (int i = 0; i < params.length; i++) {
             DeviceParameter deviceParameter = deviceParameterList.get(i);
@@ -46,6 +46,7 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
             params[i][11] = deviceParameter.getParamType();
             params[i][12] = deviceParameter.getCategory();
             params[i][13] = deviceParameter.getRemark();
+            params[i][14] = deviceParameter.getChannelAmount();
         }
 
         StringBuilder wenHao = new StringBuilder();
@@ -126,6 +127,11 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
             paramValueList.add(deviceParameter.getRemark());
         }
 
+        if (deviceParameter.getChannelAmount() != null) {
+            paramBuf.append(" ChannelAmount= ? and");
+            paramValueList.add(deviceParameter.getChannelAmount());
+        }
+
         String sql = "delete from DeviceParameter where " + paramBuf.substring(0, paramBuf.length() - 3);
         return queryRunner.update(sql, paramValueList.toArray());
     }
@@ -149,8 +155,8 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
 
     @Override
     public int updateDeviceParameter(DeviceParameter deviceParameter) throws SQLException {
-        String sql = "update DeviceParameter set ParamName= ? , ParamLength= ? , DecimalPlaces= ? , Unit= ? , MinValue= ? , MaxValue= ? , RegisterAddress= ? , StartBit= ? , EndBit= ? , Symbol= ? , ParamType= ? , Category= ? , Remark= ?  where ID = ?";
-        return queryRunner.update(sql, deviceParameter.getParamName(), deviceParameter.getParamLength(), deviceParameter.getDecimalPlaces(), deviceParameter.getUnit(), deviceParameter.getMinValue(), deviceParameter.getMaxValue(), deviceParameter.getRegisterAddress(), deviceParameter.getStartBit(), deviceParameter.getEndBit(), deviceParameter.getSymbol(), deviceParameter.getParamType(), deviceParameter.getCategory(), deviceParameter.getRemark(), deviceParameter.getID());
+        String sql = "update DeviceParameter set ParamName= ? , ParamLength= ? , DecimalPlaces= ? , Unit= ? , MinValue= ? , MaxValue= ? , RegisterAddress= ? , StartBit= ? , EndBit= ? , Symbol= ? , ParamType= ? , Category= ? , Remark= ? , ChannelAmount= ? where ID = ?";
+        return queryRunner.update(sql, deviceParameter.getParamName(), deviceParameter.getParamLength(), deviceParameter.getDecimalPlaces(), deviceParameter.getUnit(), deviceParameter.getMinValue(), deviceParameter.getMaxValue(), deviceParameter.getRegisterAddress(), deviceParameter.getStartBit(), deviceParameter.getEndBit(), deviceParameter.getSymbol(), deviceParameter.getParamType(), deviceParameter.getCategory(), deviceParameter.getRemark(), deviceParameter.getChannelAmount(), deviceParameter.getID());
     }
 
     @Override
@@ -221,6 +227,11 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
             paramBuf.append(" Remark= ? and");
             paramValueList.add(deviceParameter.getRemark());
         }
+        if (deviceParameter.getChannelAmount() != null) {
+            paramBuf.append(" ChannelAmount= ? and");
+            paramValueList.add(deviceParameter.getChannelAmount());
+        }
+
 
         String sql = "select count(*) from DeviceParameter where " + paramBuf.substring(0, paramBuf.length() - 3);
         Long query = queryRunner.query(sql, new ScalarHandler<Long>(), paramValueList.toArray());
@@ -229,13 +240,13 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
 
     @Override
     public DeviceParameter selectDeviceParameterByID(Integer ID) throws SQLException {
-        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark from DeviceParameter where  ID = ?";
+        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark, ChannelAmount as ChannelAmount from DeviceParameter where  ID = ?";
         return queryRunner.query(sql, new BeanHandler<>(DeviceParameter.class), ID);
     }
 
     @Override
     public List<DeviceParameter> selectAllDeviceParameter() throws SQLException {
-        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark from DeviceParameter";
+        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark, ChannelAmount as ChannelAmount from DeviceParameter";
         return queryRunner.query(sql, new BeanListHandler<>(DeviceParameter.class));
     }
 
@@ -301,7 +312,12 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
             paramValueList.add(deviceParameter.getRemark());
         }
 
-        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark  from DeviceParameter where " + paramBuf.substring(0, paramBuf.length() - 3);
+        if (deviceParameter.getChannelAmount() != null) {
+            paramBuf.append(" ChannelAmount= ? and");
+            paramValueList.add(deviceParameter.getChannelAmount());
+        }
+
+        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark, ChannelAmount as ChannelAmount  from DeviceParameter where " + paramBuf.substring(0, paramBuf.length() - 3);
         return queryRunner.query(sql, new BeanListHandler<>(DeviceParameter.class), paramValueList.toArray());
     }
 
@@ -310,7 +326,7 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
         int page = pageParam.getPage();
         int rows = pageParam.getRows();
 
-        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark from DeviceParameter limit ?, ?";
+        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark, ChannelAmount as ChannelAmount from DeviceParameter limit ?, ?";
         return queryRunner.query(sql, new BeanListHandler<>(DeviceParameter.class), (page - 1) * rows, rows);
     }
 
@@ -379,7 +395,12 @@ public class DeviceParameterDaoImpl implements DeviceParameterDao {
             paramValueList.add(deviceParameter.getRemark());
         }
 
-        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark  from DeviceParameter where " + paramBuf.substring(0, paramBuf.length() - 3) + " limit ?, ?";
+        if (deviceParameter.getChannelAmount() != null) {
+            paramBuf.append(" ChannelAmount= ? and");
+            paramValueList.add(deviceParameter.getChannelAmount());
+        }
+
+        String sql = "select ID as ID, ParamName as ParamName, ParamLength as ParamLength, DecimalPlaces as DecimalPlaces, Unit as Unit, MinValue as MinValue, MaxValue as MaxValue, RegisterAddress as RegisterAddress, StartBit as StartBit, EndBit as EndBit, Symbol as Symbol, ParamType as ParamType, Category as Category, Remark as Remark, ChannelAmount as ChannelAmount  from DeviceParameter where " + paramBuf.substring(0, paramBuf.length() - 3) + " limit ?, ?";
 
         paramValueList.add((page - 1) * rows);
         paramValueList.add(rows);

@@ -5,200 +5,185 @@ import java.lang.String;
 import java.lang.Integer;
 
 public class DeviceParameter {
-	/**
-    * ID
-    */
+    /**
+     * ID
+     */
     private Integer ID;
-	/**
-    * ParamName
-    */
+    /**
+     * ParamName
+     */
     private String ParamName;
-	/**
-    * ParamLength
-    */
+    /**
+     * ParamLength
+     */
     private Integer ParamLength;
-	/**
-    * DecimalPlaces
-    */
+    /**
+     * DecimalPlaces
+     */
     private Integer DecimalPlaces;
-	/**
-    * Unit
-    */
+    /**
+     * Unit
+     */
     private String Unit;
-	/**
-    * MinValue
-    */
+    /**
+     * MinValue
+     */
     private Long MinValue;
-	/**
-    * MaxValue
-    */
+    /**
+     * MaxValue
+     */
     private Long MaxValue;
-	/**
-    * RegisterAddress
-    */
+    /**
+     * RegisterAddress
+     */
     private Integer RegisterAddress;
-	/**
-    * StartBit
-    */
+    /**
+     * StartBit
+     */
     private Integer StartBit;
-	/**
-    * EndBit
-    */
+    /**
+     * EndBit
+     */
     private Integer EndBit;
-	/**
-    * Symbol
-    */
+    /**
+     * Symbol
+     */
     private String Symbol;
-	/**
-    * ParamType
-    */
+    /**
+     * ParamType
+     */
     private Integer ParamType;
-	/**
-    * Category
-    */
+    /**
+     * Category
+     */
     private String Category;
-	/**
-    * Remark
-    */
+    /**
+     * Remark
+     */
     private String Remark;
 
-    public DeviceParameter(){
+    /**
+     * Remark
+     */
+    private String ChannelAmount;
+
+    public Integer getID() {
+        return ID;
     }
 
-    public DeviceParameter(Integer ID, String ParamName, Integer ParamLength, Integer DecimalPlaces, String Unit, Long MinValue, Long MaxValue, Integer RegisterAddress, Integer StartBit, Integer EndBit, String Symbol, Integer ParamType, String Category, String Remark){
-        this.ID=ID;
-        this.ParamName=ParamName;
-        this.ParamLength=ParamLength;
-        this.DecimalPlaces=DecimalPlaces;
-        this.Unit=Unit;
-        this.MinValue=MinValue;
-        this.MaxValue=MaxValue;
-        this.RegisterAddress=RegisterAddress;
-        this.StartBit=StartBit;
-        this.EndBit=EndBit;
-        this.Symbol=Symbol;
-        this.ParamType=ParamType;
-        this.Category=Category;
-        this.Remark=Remark;
-    }
-
-    public Integer getID(){
-        return this.ID;
-    }
-    public void setID(Integer ID){
+    public void setID(Integer ID) {
         this.ID = ID;
     }
 
-    public String getParamName(){
-        return this.ParamName;
-    }
-    public void setParamName(String ParamName){
-        this.ParamName = ParamName;
+    public String getParamName() {
+        return ParamName;
     }
 
-    public Integer getParamLength(){
-        return this.ParamLength;
-    }
-    public void setParamLength(Integer ParamLength){
-        this.ParamLength = ParamLength;
+    public void setParamName(String paramName) {
+        ParamName = paramName;
     }
 
-    public Integer getDecimalPlaces(){
-        return this.DecimalPlaces;
-    }
-    public void setDecimalPlaces(Integer DecimalPlaces){
-        this.DecimalPlaces = DecimalPlaces;
+    public Integer getParamLength() {
+        return ParamLength;
     }
 
-    public String getUnit(){
-        return this.Unit;
-    }
-    public void setUnit(String Unit){
-        this.Unit = Unit;
+    public void setParamLength(Integer paramLength) {
+        ParamLength = paramLength;
     }
 
-    public Long getMinValue(){
-        return this.MinValue;
-    }
-    public void setMinValue(Long MinValue){
-        this.MinValue = MinValue;
+    public Integer getDecimalPlaces() {
+        return DecimalPlaces;
     }
 
-    public Long getMaxValue(){
-        return this.MaxValue;
-    }
-    public void setMaxValue(Long MaxValue){
-        this.MaxValue = MaxValue;
+    public void setDecimalPlaces(Integer decimalPlaces) {
+        DecimalPlaces = decimalPlaces;
     }
 
-    public Integer getRegisterAddress(){
-        return this.RegisterAddress;
-    }
-    public void setRegisterAddress(Integer RegisterAddress){
-        this.RegisterAddress = RegisterAddress;
+    public String getUnit() {
+        return Unit;
     }
 
-    public Integer getStartBit(){
-        return this.StartBit;
-    }
-    public void setStartBit(Integer StartBit){
-        this.StartBit = StartBit;
+    public void setUnit(String unit) {
+        Unit = unit;
     }
 
-    public Integer getEndBit(){
-        return this.EndBit;
-    }
-    public void setEndBit(Integer EndBit){
-        this.EndBit = EndBit;
+    public Long getMinValue() {
+        return MinValue;
     }
 
-    public String getSymbol(){
-        return this.Symbol;
-    }
-    public void setSymbol(String Symbol){
-        this.Symbol = Symbol;
+    public void setMinValue(Long minValue) {
+        MinValue = minValue;
     }
 
-    public Integer getParamType(){
-        return this.ParamType;
-    }
-    public void setParamType(Integer ParamType){
-        this.ParamType = ParamType;
+    public Long getMaxValue() {
+        return MaxValue;
     }
 
-    public String getCategory(){
-        return this.Category;
-    }
-    public void setCategory(String Category){
-        this.Category = Category;
+    public void setMaxValue(Long maxValue) {
+        MaxValue = maxValue;
     }
 
-    public String getRemark(){
-        return this.Remark;
-    }
-    public void setRemark(String Remark){
-        this.Remark = Remark;
+    public Integer getRegisterAddress() {
+        return RegisterAddress;
     }
 
-
-    @Override
-    public String toString() {
-        return "DeviceParameter{" +
-                "ID=" + ID +
-                ", ParamName=" + ParamName +
-                ", ParamLength=" + ParamLength +
-                ", DecimalPlaces=" + DecimalPlaces +
-                ", Unit=" + Unit +
-                ", MinValue=" + MinValue +
-                ", MaxValue=" + MaxValue +
-                ", RegisterAddress=" + RegisterAddress +
-                ", StartBit=" + StartBit +
-                ", EndBit=" + EndBit +
-                ", Symbol=" + Symbol +
-                ", ParamType=" + ParamType +
-                ", Category=" + Category +
-                ", Remark=" + Remark +
-                '}';
+    public void setRegisterAddress(Integer registerAddress) {
+        RegisterAddress = registerAddress;
     }
 
+    public Integer getStartBit() {
+        return StartBit;
+    }
+
+    public void setStartBit(Integer startBit) {
+        StartBit = startBit;
+    }
+
+    public Integer getEndBit() {
+        return EndBit;
+    }
+
+    public void setEndBit(Integer endBit) {
+        EndBit = endBit;
+    }
+
+    public String getSymbol() {
+        return Symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        Symbol = symbol;
+    }
+
+    public Integer getParamType() {
+        return ParamType;
+    }
+
+    public void setParamType(Integer paramType) {
+        ParamType = paramType;
+    }
+
+    public String getCategory() {
+        return Category;
+    }
+
+    public void setCategory(String category) {
+        Category = category;
+    }
+
+    public String getRemark() {
+        return Remark;
+    }
+
+    public void setRemark(String remark) {
+        Remark = remark;
+    }
+
+    public String getChannelAmount() {
+        return ChannelAmount;
+    }
+
+    public void setChannelAmount(String channelAmount) {
+        ChannelAmount = channelAmount;
+    }
 }
