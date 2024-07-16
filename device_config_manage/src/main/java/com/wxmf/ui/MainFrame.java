@@ -43,8 +43,8 @@ public class MainFrame extends JFrame {
 
     Logger logger = LoggerFactory.getLogger(MainFrame.class);
 
-    //private final static int PORT = 9527;
-    private final static int PORT = 8063;
+    private final static int PORT = 9527;
+    //private final static int PORT = 8063;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     DeviceInfoService deviceInfoService = new DeviceInfoServiceImpl();
 
@@ -543,10 +543,17 @@ public class MainFrame extends JFrame {
                 sbParam.append(StringUtils.leftPad(Integer.toHexString(list.get(0).getRegisterAddress()), 4, '0').toUpperCase());
                 //4个字节有效参数位
 
+                Integer endBit = list.get(0).getEndBit();
+                if (list.get(0).getParamType() == 2) {
+                    //正负数据类  有效数据位包含符号位 暂未处理
+                    //endBit = 31;
+
+                }
+
                 StringBuilder sbParamBit = new StringBuilder();
                 for (int i = 31; i >= 0; i--) {
                     //
-                    if (i >= list.get(0).getStartBit() && i <= list.get(0).getEndBit()) {
+                    if (i >= list.get(0).getStartBit() && i <= endBit) {
                         sbParamBit.append("1");
                     } else {
                         sbParamBit.append("0");
@@ -946,9 +953,14 @@ public class MainFrame extends JFrame {
                 sbParam.append(StringUtils.leftPad(Integer.toHexString(parameterList.get(0).getRegisterAddress()), 4, '0').toUpperCase());
 
                 StringBuilder sbParamBit = new StringBuilder();
+                Integer endBit = parameterList.get(0).getEndBit();
+                if (parameterList.get(0).getParamType() == 2) {
+                    //正负数据类
+                    endBit = 31;
+                }
                 for (int i = 31; i >= 0; i--) {
                     //
-                    if (i >= parameterList.get(0).getStartBit() && i <= parameterList.get(0).getEndBit()) {
+                    if (i >= parameterList.get(0).getStartBit() && i <= endBit) {
                         sbParamBit.append("1");
                     } else {
                         sbParamBit.append("0");
@@ -1025,7 +1037,11 @@ public class MainFrame extends JFrame {
                         }
                     } else {
                         for (int i = 0; i < 31 - parameterList.get(0).getEndBit(); i++) {
-                            sb.append("1");
+                            if (i == 31 - parameterList.get(0).getEndBit() - 1) {
+                                sb.append("1");
+                            } else {
+                                sb.append("0");
+                            }
                         }
                     }
                     paramValue = Math.abs(paramValue);
@@ -1036,9 +1052,12 @@ public class MainFrame extends JFrame {
                     paramLength++;
                 } else {
 
+                    int value = parseInt(split[2]);
                     //4字节参数值
-                    String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(split[2])), parameterList.get(0).getEndBit() - parameterList.get(0).getStartBit() + 1, '0');
+                    String strBin = StringUtils.leftPad(Integer.toBinaryString(value), parameterList.get(0).getEndBit() - parameterList.get(0).getStartBit() + 1, '0');
+
                     strBin = StringUtils.rightPad(strBin, strBin.length() + parameterList.get(0).getStartBit(), '0');
+
                     strBin = StringUtils.leftPad(strBin, 32, '0');
                     sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
                     paramLength++;
@@ -1997,7 +2016,7 @@ public class MainFrame extends JFrame {
                 DeviceParameter deviceParameter = new DeviceParameter();
                 deviceParameter.setRegisterAddress(registerAddress);
                 deviceParameter.setStartBit(startBit);
-                deviceParameter.setEndBit(endBit);
+                //deviceParameter.setEndBit(endBit);
                 List<DeviceParameter> deviceParameters = deviceParameterService.getDeviceParameter(deviceParameter);
 
                 //|| registerAddress == 299 || registerAddress == 330|| registerAddress == 333 || registerAddress == 336
