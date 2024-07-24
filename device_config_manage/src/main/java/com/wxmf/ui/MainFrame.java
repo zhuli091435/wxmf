@@ -311,13 +311,17 @@ public class MainFrame extends JFrame {
     private void initQueryHistoryDataOrder(DeviceOrder deviceOrder) {
         String params = deviceOrder.getParameter();
 
+        String[] paramsArr = params.split("-");
 
         StringBuilder sb = new StringBuilder();
         sb.append("F1030000000000");
         //报文长度
         sb.append(StringUtils.leftPad(Integer.toHexString(12 + 10), 4, '0').toUpperCase());
         //功能码
-        sb.append("78");
+        sb.append("79");
+
+        sb.append(paramsArr[0]);
+        sb.append(paramsArr[1]);
 
         //和校验
         sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
@@ -331,7 +335,7 @@ public class MainFrame extends JFrame {
             orderDetail.setOrderID(deviceOrder.getID());
             orderDetail.setCurPackageNumber(1);
             orderDetail.setTotalPackageNumber(1);
-            orderDetail.setMsgType("78");
+            orderDetail.setMsgType("79");
             orderDetail.setMsgContent(sb.toString());
             orderDetail.setMsgState(0);
             orderDetail.setExecuteCount(0);
@@ -343,7 +347,51 @@ public class MainFrame extends JFrame {
             deviceOrderService.updateDeviceOrder(deviceOrder);
         } catch (SQLException ex) {
             try {
-                modifyOrderInfo(deviceOrder, "指令初始化，添加查询实时数据指令失败!");
+                modifyOrderInfo(deviceOrder, "指令初始化，添加查询历史数据指令失败!");
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+            logger.error(ex.getMessage());
+        }
+    }
+
+    private void initQueryHistoryDataOrderAgain(DeviceOrder deviceOrder, String startTime, String endTime) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("F1030000000000");
+        //报文长度
+        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 10), 4, '0').toUpperCase());
+        //功能码
+        sb.append("79");
+
+        sb.append(startTime);
+        sb.append(endTime);
+
+        //和校验
+        sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
+        //结束符
+        sb.append("F2");
+
+        try {
+            deviceOrder.setCurMsgIndex(0);
+            deviceOrder.setTotalMsgCount(deviceOrder.getTotalMsgCount() + 1);
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderID(deviceOrder.getID());
+            orderDetail.setCurPackageNumber(1);
+            orderDetail.setTotalPackageNumber(1);
+            orderDetail.setMsgType("79");
+            orderDetail.setMsgContent(sb.toString());
+            orderDetail.setMsgState(0);
+            orderDetail.setExecuteCount(0);
+            orderDetail.setSort(deviceOrder.getTotalMsgCount());
+            orderDetailService.addOrderDetail(orderDetail);
+
+            deviceOrder.setOrderState(DeviceOrder.UNEXECUTED);
+            deviceOrder.setRemark("初始化成功");
+            deviceOrderService.updateDeviceOrder(deviceOrder);
+        } catch (SQLException ex) {
+            try {
+                modifyOrderInfo(deviceOrder, "指令初始化，添加查询历史数据指令失败!");
             } catch (Exception e) {
                 logger.error(e.getMessage());
             }
@@ -1516,6 +1564,8 @@ public class MainFrame extends JFrame {
                         //查询连续参数
                         if (deviceOrder.getOrderCode().equals("71")) {
                             executeQueryAllParamOrder(outputStream, inputStream, deviceOrder);
+                        } else if (deviceOrder.getOrderCode().equals("79")) {
+                            executeQueryHistoryDataOrder(outputStream, inputStream, deviceOrder);
                         } else {
                             executeOrder(outputStream, inputStream, deviceOrder);
                         }
@@ -1578,6 +1628,57 @@ public class MainFrame extends JFrame {
         }
     }
 
+    private void executeQueryHistoryDataOrder(OutputStream outputStream, InputStream inputStream, DeviceOrder deviceOrder) {
+        FileWriter fileWriter = null;
+        BufferedWriter bufferedWriter = null;
+        try {
+            deviceOrder.setBeginExecuteTime(new Date());
+            logger.info("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+
+            String fileName = "exportFile/" + deviceOrder.getDeviceID() + "_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "_history" + ".txt";
+
+            int count = 0;
+            while (true) {
+                count++;
+                List<OrderDetail> orderDetails = orderDetailService.getOrderDetailByOrderID(deviceOrder.getID()).stream().filter(o -> o.getMsgState().equals(OrderDetail.UNEXECUTED)).collect(Collectors.toList());
+                if (orderDetails.size() == 0) {
+                    break;
+                }
+                for (int i = 0; i < orderDetails.size(); i++) {
+                    boolean b = executeQueryHistoryDataOrderDetail(inputStream, outputStream, orderDetails.get(i), deviceOrder, fileName, count);
+                    if (!b) {
+                        deviceOrder.setOrderState(DeviceOrder.FAILED);
+                        deviceOrder.setRemark("执行失败，已达最大尝试发送次数");
+                        deviceOrderService.updateDeviceOrder(deviceOrder);
+
+                        OrderDetail orderDetail = new OrderDetail();
+                        orderDetail.setOrderID(deviceOrder.getID());
+                        orderDetailService.deleteOrderDetail(orderDetail);
+
+                        logger.info("失败执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+                        refreshOrderTable(deviceOrder);
+                        return;
+                    }
+                }
+            }
+
+
+            deviceOrder.setOrderState(DeviceOrder.SUCCEED);
+            deviceOrder.setRemark("指令执行成功！");
+            deviceOrder.setCompleteTime(new Date());
+            deviceOrder.setOrderResult(fileName);
+            deviceOrderService.updateDeviceOrder(deviceOrder);
+
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderID(deviceOrder.getID());
+            orderDetailService.deleteOrderDetail(orderDetail);
+
+            logger.info("成功执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
+            refreshOrderTable(deviceOrder);
+        } catch (Exception e) {
+            logger.error("执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + "指令发生错误," + e.getMessage() + ExceptionUtil.getStackTrace(e));
+        }
+    }
 
     private void executeQueryAllParamOrder(OutputStream outputStream, InputStream inputStream, DeviceOrder deviceOrder) {
         FileWriter fileWriter = null;
@@ -1816,6 +1917,164 @@ public class MainFrame extends JFrame {
         orderDetailService.updateOrderDetail(orderDetail);
 
         return false;
+    }
+
+    private boolean executeQueryHistoryDataOrderDetail(InputStream inputStream, OutputStream outputStream, OrderDetail orderDetail, DeviceOrder deviceOrder, String fileName, int count) throws IOException, SQLException, InterruptedException {
+
+        deviceOrder.setCurMsgIndex(deviceOrder.getCurMsgIndex() + 1);
+
+        while (orderDetail.getExecuteCount() < 10) {
+            //发送次数加1
+
+            orderDetail.setExecuteCount(orderDetail.getExecuteCount() + 1);
+            logger.info("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据");
+            byte[] sendBytes = CommonUil.hexToByteArray(orderDetail.getMsgContent());
+            outputStream.write(sendBytes);
+
+            while (true) {
+                try {
+                    byte[] bytes = new byte[1024];
+                    int len = inputStream.read(bytes);
+                    byte[] dataBytes = Arrays.copyOf(bytes, len);
+                    logger.info("收到设备(" + deviceOrder.getDeviceID() + ")回执，" + CommonUil.byteArrayToHexString(dataBytes));
+                    //System.out.println(CommonUil.byteArrayToHexString(dataBytes));
+                    WXMFProtocol wxmfProtocol = WXMFProtocolUtil.createWXMFProtocol(dataBytes);
+
+                    if (wxmfProtocol.getProtocolData().getResponse().equals("01")) {
+                        if (wxmfProtocol.getFunctionCode().equals(orderDetail.getMsgType())) {
+                            updateDeviceInfo(wxmfProtocol);
+
+                            //数据发送成功
+                            orderDetail.setMsgState(OrderDetail.SUCCEED);
+                            orderDetailService.updateOrderDetail(orderDetail);
+
+                            saveHistoryData(deviceOrder, wxmfProtocol, fileName, count);
+
+                            return true;
+                        } else {
+                            logger.error("设备(" + deviceOrder.getDeviceID() + ")回执功能码不匹配，继续读取");
+                        }
+                    } else {
+                        logger.error("设备(" + deviceOrder.getDeviceID() + ")回执执行失败");
+                        //如果返回执行失败，说明没有获取到数据
+                        orderDetail.setMsgState(OrderDetail.SUCCEED);
+                        orderDetailService.updateOrderDetail(orderDetail);
+                        return true;
+                    }
+                    break;
+                } catch (SocketTimeoutException e) {
+                    //读取超时，尝试下次发送数据
+                    logger.error("设备(" + deviceOrder.getDeviceID() + ")读取超时，尝试下次发送数据");
+                    break;
+                } catch (IOException e) {
+                    logger.error("设备(" + e.getMessage() + ")读取异常");
+                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    logger.error("设备(" + ExceptionUtil.getStackTrace(e) + ")解析异常");
+                    //不是后台协议，继续读取
+                    throw new RuntimeException(e);
+                }
+            }
+
+
+            orderDetailService.updateOrderDetail(orderDetail);
+        }
+
+        //尝试次数超过10次，直接结束本次指令
+        orderDetail.setMsgState(OrderDetail.FAILED);
+        orderDetailService.updateOrderDetail(orderDetail);
+
+        return false;
+    }
+
+    private void saveHistoryData(DeviceOrder deviceOrder, WXMFProtocol wxmfProtocol, String fileName, int count) {
+        FileWriter fileWriter = null;
+        BufferedWriter bufferedWriter = null;
+        try {
+
+            fileWriter = new FileWriter(fileName, true);
+            bufferedWriter = new BufferedWriter(fileWriter);
+
+            SimpleDateFormat simpleDateFormatTime = new SimpleDateFormat("yyMMddHHmm");
+            byte[] dataBytes = wxmfProtocol.getProtocolData().getBytes();
+            Date startTime = simpleDateFormatTime.parse(CommonUil.byteArrayToHexString(dataBytes, 0, 5));
+
+            int interval = dataBytes[5] & 0xFF;
+            int channelAmount = dataBytes[7] & 0xFF;
+
+            if (count == 1) {
+                bufferedWriter.write("运维平台下载：");
+                bufferedWriter.newLine();
+
+                bufferedWriter.write("RTU站号：" + Integer.parseInt(wxmfProtocol.getProtocolData().getDeviceAddress(), 16));
+                bufferedWriter.newLine();
+
+                SimpleDateFormat equipDateFormat = new SimpleDateFormat("yyMMddHHmmss");
+                Date equipDate = equipDateFormat.parse(wxmfProtocol.getProtocolData().getEquipDate());
+                bufferedWriter.write("RTU时间：" + new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒").format(equipDate));
+                bufferedWriter.newLine();
+
+                bufferedWriter.write("存储间隔：" + StringUtils.leftPad(interval + "", 2, "0") + "分钟");
+                bufferedWriter.newLine();
+
+                bufferedWriter.write("通道数量：" + StringUtils.leftPad(channelAmount + "", 2, "0"));
+                bufferedWriter.newLine();
+
+                bufferedWriter.write("\t\t\t\t\t");
+                for (int i = 0; i < channelAmount; i++) {
+                    String channelType = CommonUil.byteToHexString(dataBytes[8 + i]);
+                    bufferedWriter.write("\t通道" + StringUtils.leftPad((i + 1) + "", 2, "0") + "=" + channelType);
+                }
+                bufferedWriter.newLine();
+            }
+            int groupAmount = dataBytes[6] & 0xFF;
+
+            Calendar instance = Calendar.getInstance();
+            instance.setTime(startTime);
+            for (int i = 0; i < groupAmount; i++) {
+                bufferedWriter.write(simpleDateFormat.format(instance.getTime()));
+                for (int j = 0; j < channelAmount; j++) {
+                    String data = CommonUil.byteArrayToHexString(dataBytes, 8 + channelAmount + j * 4, 7 + channelAmount + j * 4 + 5);
+                    if (data.equals("FFFFFFFF")) {
+                        bufferedWriter.write("\t\t----------");
+                    } else {
+                        bufferedWriter.write("\t\t" + StringUtils.rightPad(Long.parseLong(data, 16) + "", 10, ""));
+                    }
+                }
+                bufferedWriter.newLine();
+                instance.add(Calendar.MINUTE, interval);
+            }
+
+            String[] split = deviceOrder.getParameter().split("-");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmm");
+            Date endDate = dateFormat.parse(split[1]);
+            if (instance.getTime().before(endDate)) {
+                //
+                instance.add(Calendar.MINUTE, interval);
+                initQueryHistoryDataOrderAgain(deviceOrder, dateFormat.format(instance.getTime()), split[1]);
+            }
+
+            bufferedWriter.flush();
+            bufferedWriter.close();
+            fileWriter.close();
+
+
+        } catch (Exception e) {
+            if (bufferedWriter != null) {
+                try {
+                    bufferedWriter.close();
+                } catch (IOException ex) {
+                    //throw new RuntimeException(ex);
+                }
+            }
+            if (fileWriter != null) {
+                try {
+                    fileWriter.close();
+                } catch (IOException ex) {
+                    //
+                }
+            }
+        }
     }
 
     private void saveFlowCapacityRelationship(DeviceOrder deviceOrder, WXMFProtocol wxmfProtocol) {
