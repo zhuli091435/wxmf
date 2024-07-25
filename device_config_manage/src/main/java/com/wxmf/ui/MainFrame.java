@@ -440,23 +440,24 @@ public class MainFrame extends JFrame {
     }
 
     private void initSetManageParamOrder(DeviceOrder deviceOrder) {
-        String params = deviceOrder.getParameter();
+
+        String[] parameterArr = deviceOrder.getParameter().split("=");
 
 
         StringBuilder sb = new StringBuilder();
         sb.append("F1030000000000");
         //报文长度
-        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 1 + 1 + params.length()), 4, '0').toUpperCase());
+        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 1 + 1 + parameterArr[1].length()), 4, '0').toUpperCase());
         //功能码
         sb.append("F6");
 
         //
         sb.append("01");
 
-        sb.append("80");
-        sb.append(StringUtils.leftPad(Integer.toHexString(params.length()), 2, '0').toUpperCase());
+        sb.append(parameterArr[0]);
+        sb.append(StringUtils.leftPad(Integer.toHexString(parameterArr[1].length()), 2, '0').toUpperCase());
 
-        byte[] bytes = params.getBytes();
+        byte[] bytes = parameterArr[1].getBytes();
 
         sb.append(CommonUil.byteArrayToHexString(bytes));
 
@@ -1292,7 +1293,7 @@ public class MainFrame extends JFrame {
             case ADD_REPORT_FUNCTION_CODE://加报
             case HEARTBEAT_FUNCTION_CODE://心跳
                 //应答设备
-                answerDevice(wxmfProtocol, socket);
+                answerDevice(wxmfProtocol, socket.getOutputStream());
                 //更新设备信息
                 updateDeviceInfo(wxmfProtocol);
                 executeDeviceOrder(socket, wxmfProtocol.getProtocolData().getDeviceID());
@@ -1301,7 +1302,8 @@ public class MainFrame extends JFrame {
 
     }
 
-    private void answerDevice(WXMFProtocol wxmfProtocol, Socket socket) {
+
+    private void answerDevice(WXMFProtocol wxmfProtocol, OutputStream outputStream) {
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("F1");
@@ -1322,7 +1324,7 @@ public class MainFrame extends JFrame {
                 stringBuilder.append("F2");
 
                 try {
-                    OutputStream outputStream = socket.getOutputStream();
+                    //OutputStream outputStream = socket.getOutputStream();
                     outputStream.write(CommonUil.hexToByteArray(stringBuilder.toString()));
                     logger.error("应答" + stringBuilder);
                 } catch (Exception e) {
@@ -1338,7 +1340,7 @@ public class MainFrame extends JFrame {
                 stringBuilder.append("F2");
 
                 try {
-                    OutputStream outputStream = socket.getOutputStream();
+                    //OutputStream outputStream = socket.getOutputStream();
                     outputStream.write(CommonUil.hexToByteArray(stringBuilder.toString()));
                 } catch (Exception e) {
                     logger.error(e.getMessage());
@@ -1629,8 +1631,6 @@ public class MainFrame extends JFrame {
     }
 
     private void executeQueryHistoryDataOrder(OutputStream outputStream, InputStream inputStream, DeviceOrder deviceOrder) {
-        FileWriter fileWriter = null;
-        BufferedWriter bufferedWriter = null;
         try {
             deviceOrder.setBeginExecuteTime(new Date());
             logger.info("开始执行" + deviceOrder.getDeviceID() + deviceOrder.getOrderName() + deviceOrder.getOrderCode() + "指令");
@@ -1927,16 +1927,16 @@ public class MainFrame extends JFrame {
             //发送次数加1
 
             orderDetail.setExecuteCount(orderDetail.getExecuteCount() + 1);
-            logger.info("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据");
+            logger.info("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据" + orderDetail.getMsgContent());
             byte[] sendBytes = CommonUil.hexToByteArray(orderDetail.getMsgContent());
             outputStream.write(sendBytes);
 
             while (true) {
                 try {
-                    byte[] bytes = new byte[1024];
+                    byte[] bytes = new byte[2048];
                     int len = inputStream.read(bytes);
                     byte[] dataBytes = Arrays.copyOf(bytes, len);
-                    logger.info("收到设备(" + deviceOrder.getDeviceID() + ")回执，" + CommonUil.byteArrayToHexString(dataBytes));
+                    logger.info("收到设备(" + deviceOrder.getDeviceID() + ")回执，长度为" + len + "，" + CommonUil.byteArrayToHexString(dataBytes));
                     //System.out.println(CommonUil.byteArrayToHexString(dataBytes));
                     WXMFProtocol wxmfProtocol = WXMFProtocolUtil.createWXMFProtocol(dataBytes);
 
@@ -1944,24 +1944,37 @@ public class MainFrame extends JFrame {
                         if (wxmfProtocol.getFunctionCode().equals(orderDetail.getMsgType())) {
                             updateDeviceInfo(wxmfProtocol);
 
-                            //数据发送成功
-                            orderDetail.setMsgState(OrderDetail.SUCCEED);
-                            orderDetailService.updateOrderDetail(orderDetail);
-
-                            saveHistoryData(deviceOrder, wxmfProtocol, fileName, count);
-
-                            return true;
+                            if (saveHistoryData(deviceOrder, wxmfProtocol, fileName, count)) {
+                                //数据发送成功
+                                orderDetail.setMsgState(OrderDetail.SUCCEED);
+                                orderDetailService.updateOrderDetail(orderDetail);
+                                return true;
+                            }
                         } else {
-                            logger.error("设备(" + deviceOrder.getDeviceID() + ")回执功能码不匹配，继续读取");
+                            logger.error("设备(" + deviceOrder.getDeviceID() + ")回执非数据下载指令，继续读取");
+                            switch (wxmfProtocol.getFunctionCode()) {
+
+                                case TIMED_REPORT_FUNCTION_CODE://定时报
+                                    parsingMessage(wxmfProtocol.getProtocolData().getDeviceID(), wxmfProtocol.getProtocolData().getBytes());
+                                case TEST_REPORT_FUNCTION_CODE://测试报
+                                case ADD_REPORT_FUNCTION_CODE://加报
+                                case HEARTBEAT_FUNCTION_CODE://心跳
+                                    //应答设备
+                                    answerDevice(wxmfProtocol, outputStream);
+                                    //更新设备信息
+                                    updateDeviceInfo(wxmfProtocol);
+                            }
                         }
-                    } else {
-                        logger.error("设备(" + deviceOrder.getDeviceID() + ")回执执行失败");
+                    } else if (wxmfProtocol.getProtocolData().getResponse().equals("00") || wxmfProtocol.getProtocolData().getBytes().length == 0) {
+                        logger.error("设备(" + deviceOrder.getDeviceID() + ")未获取到新数据，数据下载结束");
                         //如果返回执行失败，说明没有获取到数据
                         orderDetail.setMsgState(OrderDetail.SUCCEED);
                         orderDetailService.updateOrderDetail(orderDetail);
                         return true;
+                    } else {
+                        logger.error("设备(" + deviceOrder.getDeviceID() + ")回执异常");
                     }
-                    break;
+
                 } catch (SocketTimeoutException e) {
                     //读取超时，尝试下次发送数据
                     logger.error("设备(" + deviceOrder.getDeviceID() + ")读取超时，尝试下次发送数据");
@@ -1987,7 +2000,7 @@ public class MainFrame extends JFrame {
         return false;
     }
 
-    private void saveHistoryData(DeviceOrder deviceOrder, WXMFProtocol wxmfProtocol, String fileName, int count) {
+    private boolean saveHistoryData(DeviceOrder deviceOrder, WXMFProtocol wxmfProtocol, String fileName, int count) {
         FileWriter fileWriter = null;
         BufferedWriter bufferedWriter = null;
         try {
@@ -2006,7 +2019,7 @@ public class MainFrame extends JFrame {
                 bufferedWriter.write("运维平台下载：");
                 bufferedWriter.newLine();
 
-                bufferedWriter.write("RTU站号：" + Integer.parseInt(wxmfProtocol.getProtocolData().getDeviceAddress(), 16));
+                bufferedWriter.write("RTU站号：" + Long.parseLong(wxmfProtocol.getProtocolData().getDeviceAddress(), 16));
                 bufferedWriter.newLine();
 
                 SimpleDateFormat equipDateFormat = new SimpleDateFormat("yyMMddHHmmss");
@@ -2031,15 +2044,19 @@ public class MainFrame extends JFrame {
 
             Calendar instance = Calendar.getInstance();
             instance.setTime(startTime);
+            int index = 8 + channelAmount;
             for (int i = 0; i < groupAmount; i++) {
                 bufferedWriter.write(simpleDateFormat.format(instance.getTime()));
                 for (int j = 0; j < channelAmount; j++) {
-                    String data = CommonUil.byteArrayToHexString(dataBytes, 8 + channelAmount + j * 4, 7 + channelAmount + j * 4 + 5);
+                    String data = CommonUil.byteArrayToHexString(dataBytes, index, index + 4);
+                    //String data = CommonUil.byteArrayToHexString(dataBytes, 8 + channelAmount + j * 4, 7 + channelAmount + j * 4 + 5);
+                    //logger.info(simpleDateFormat.format(instance.getTime()) + data);
                     if (data.equals("FFFFFFFF")) {
                         bufferedWriter.write("\t\t----------");
                     } else {
                         bufferedWriter.write("\t\t" + StringUtils.rightPad(Long.parseLong(data, 16) + "", 10, ""));
                     }
+                    index = index + 4;
                 }
                 bufferedWriter.newLine();
                 instance.add(Calendar.MINUTE, interval);
@@ -2052,14 +2069,18 @@ public class MainFrame extends JFrame {
                 //
                 instance.add(Calendar.MINUTE, interval);
                 initQueryHistoryDataOrderAgain(deviceOrder, dateFormat.format(instance.getTime()), split[1]);
+            } else {
+                bufferedWriter.write("下载已完成!");
+                //bufferedWriter.newLine();
             }
 
             bufferedWriter.flush();
             bufferedWriter.close();
             fileWriter.close();
 
-
+            return true;
         } catch (Exception e) {
+            logger.error("saveHistoryData异常," + e.getMessage() + ExceptionUtil.getStackTrace(e));
             if (bufferedWriter != null) {
                 try {
                     bufferedWriter.close();
@@ -2074,6 +2095,7 @@ public class MainFrame extends JFrame {
                     //
                 }
             }
+            return false;
         }
     }
 
