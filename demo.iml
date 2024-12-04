@@ -16,5 +16,6 @@
     <orderEntry type="library" name="Maven: com.alibaba:druid:1.2.20" level="project" />
     <orderEntry type="library" name="Maven: com.microsoft.sqlserver:mssql-jdbc:10.2.2.jre8" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.9.3" level="project" />
+    <orderEntry type="library" name="Maven: com.fazecast:jSerialComm:2.10.4" level="project" />
   </component>
 </module>

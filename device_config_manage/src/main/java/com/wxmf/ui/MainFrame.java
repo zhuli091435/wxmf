@@ -82,6 +82,7 @@ public class MainFrame extends JFrame {
 
         startListen();
 
+
     }
 
     private void bindPackageVersionTable() {
@@ -879,258 +880,267 @@ public class MainFrame extends JFrame {
     }
 
     private void initQueryAllParamOrder(DeviceOrder deviceOrder) throws SQLException {
+        try {
+            DeviceInfo deviceInfo = deviceInfoService.getDeviceInfoByDeviceID(deviceOrder.getDeviceID());
 
-        DeviceInfo deviceInfo = deviceInfoService.getDeviceInfoByDeviceID(deviceOrder.getDeviceID());
-
-        if (deviceInfo == null) {
-            return;
-        }
-
-        //deviceOrder
-        if (deviceInfo.getHardwareVersion().endsWith("1")) {
-            //一包不超过218个参数，16通道分2次读写
-            deviceOrder.setTotalMsgCount(2);
-            deviceOrder.setCurMsgIndex(0);
-            //16通道376个参数？
-            for (int i = 0; i < 2; i++) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("F1030000000000");
-                //报文长度
-                if (i == 0) {
-                    sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
-                    //功能码
-                    sb.append("71");
-                    //1字节参数个数
-                    sb.append(StringUtils.leftPad(Integer.toHexString(218), 2, '0').toUpperCase());
-                    //2字节起始参数地址
-                    sb.append(StringUtils.leftPad(Integer.toHexString(0), 4, '0').toUpperCase());
-                } else {
-                    sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
-                    //功能码
-                    sb.append("71");
-                    //1字节参数个数
-                    sb.append(StringUtils.leftPad(Integer.toHexString(158), 2, '0').toUpperCase());
-                    //2字节起始参数地址
-                    sb.append(StringUtils.leftPad(Integer.toHexString(218), 4, '0').toUpperCase());
-                }
-                //和校验
-                sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
-                //结束符
-                sb.append("F2");
-
-                //0x74 设置单个参数（用于少量参数）
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setOrderID(deviceOrder.getID());
-                orderDetail.setCurPackageNumber(i + 1);
-                orderDetail.setTotalPackageNumber(deviceOrder.getTotalMsgCount());
-                orderDetail.setMsgType("71");
-                orderDetail.setMsgContent(sb.toString());
-                orderDetail.setMsgState(0);
-                orderDetail.setExecuteCount(0);
-                orderDetail.setSort(deviceOrder.getTotalMsgCount());
-                orderDetailService.addOrderDetail(orderDetail);
-
+            if (deviceInfo == null) {
+                return;
             }
-        } else if (deviceInfo.getHardwareVersion().endsWith("2")) {
 
-            //一包不超过218个参数，32通道分4次读写
-            deviceOrder.setTotalMsgCount(4);
-            deviceOrder.setCurMsgIndex(0);
-            //32通道824个参数？
-            for (int i = 0; i < 4; i++) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("F1030000000000");
-                //报文长度
-                if (i != 3) {
-                    sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
-                    //功能码
-                    sb.append("71");
-                    //1字节参数个数
-                    sb.append(StringUtils.leftPad(Integer.toHexString(218), 2, '0').toUpperCase());
-                    //2字节起始参数地址
-                    sb.append(StringUtils.leftPad(Integer.toHexString(i * 218), 4, '0').toUpperCase());
-                } else {
-                    sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
-                    //功能码
-                    sb.append("71");
-                    //1字节参数个数
-                    sb.append(StringUtils.leftPad(Integer.toHexString(170), 2, '0').toUpperCase());
-                    //2字节起始参数地址
-                    sb.append(StringUtils.leftPad(Integer.toHexString(i * 218), 4, '0').toUpperCase());
+            //deviceOrder
+            if (deviceInfo.getHardwareVersion().endsWith("1")) {
+                //一包不超过218个参数，16通道分2次读写
+                deviceOrder.setTotalMsgCount(2);
+                deviceOrder.setCurMsgIndex(0);
+                //16通道376个参数？
+                for (int i = 0; i < 2; i++) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("F1030000000000");
+                    //报文长度
+                    if (i == 0) {
+                        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
+                        //功能码
+                        sb.append("71");
+                        //1字节参数个数
+                        sb.append(StringUtils.leftPad(Integer.toHexString(218), 2, '0').toUpperCase());
+                        //2字节起始参数地址
+                        sb.append(StringUtils.leftPad(Integer.toHexString(0), 4, '0').toUpperCase());
+                    } else {
+                        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
+                        //功能码
+                        sb.append("71");
+                        //1字节参数个数
+                        sb.append(StringUtils.leftPad(Integer.toHexString(158), 2, '0').toUpperCase());
+                        //2字节起始参数地址
+                        sb.append(StringUtils.leftPad(Integer.toHexString(218), 4, '0').toUpperCase());
+                    }
+                    //和校验
+                    sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
+                    //结束符
+                    sb.append("F2");
+
+                    //0x74 设置单个参数（用于少量参数）
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrderID(deviceOrder.getID());
+                    orderDetail.setCurPackageNumber(i + 1);
+                    orderDetail.setTotalPackageNumber(deviceOrder.getTotalMsgCount());
+                    orderDetail.setMsgType("71");
+                    orderDetail.setMsgContent(sb.toString());
+                    orderDetail.setMsgState(0);
+                    orderDetail.setExecuteCount(0);
+                    orderDetail.setSort(deviceOrder.getTotalMsgCount());
+                    orderDetailService.addOrderDetail(orderDetail);
+
                 }
-                //和校验
-                sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
-                //结束符
-                sb.append("F2");
+            } else if (deviceInfo.getHardwareVersion().endsWith("2")) {
 
-                //0x74 设置单个参数（用于少量参数）
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setOrderID(deviceOrder.getID());
-                orderDetail.setCurPackageNumber(i + 1);
-                orderDetail.setTotalPackageNumber(deviceOrder.getTotalMsgCount());
-                orderDetail.setMsgType("71");
-                orderDetail.setMsgContent(sb.toString());
-                orderDetail.setMsgState(0);
-                orderDetail.setExecuteCount(0);
-                orderDetail.setSort(i + 1);
-                orderDetailService.addOrderDetail(orderDetail);
+                //一包不超过218个参数，32通道分4次读写
+                deviceOrder.setTotalMsgCount(4);
+                deviceOrder.setCurMsgIndex(0);
+                //32通道824个参数？
+                for (int i = 0; i < 4; i++) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("F1030000000000");
+                    //报文长度
+                    if (i != 3) {
+                        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
+                        //功能码
+                        sb.append("71");
+                        //1字节参数个数
+                        sb.append(StringUtils.leftPad(Integer.toHexString(218), 2, '0').toUpperCase());
+                        //2字节起始参数地址
+                        sb.append(StringUtils.leftPad(Integer.toHexString(i * 218), 4, '0').toUpperCase());
+                    } else {
+                        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + 2), 4, '0').toUpperCase());
+                        //功能码
+                        sb.append("71");
+                        //1字节参数个数
+                        sb.append(StringUtils.leftPad(Integer.toHexString(170), 2, '0').toUpperCase());
+                        //2字节起始参数地址
+                        sb.append(StringUtils.leftPad(Integer.toHexString(i * 218), 4, '0').toUpperCase());
+                    }
+                    //和校验
+                    sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
+                    //结束符
+                    sb.append("F2");
 
+                    //0x74 设置单个参数（用于少量参数）
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrderID(deviceOrder.getID());
+                    orderDetail.setCurPackageNumber(i + 1);
+                    orderDetail.setTotalPackageNumber(deviceOrder.getTotalMsgCount());
+                    orderDetail.setMsgType("71");
+                    orderDetail.setMsgContent(sb.toString());
+                    orderDetail.setMsgState(0);
+                    orderDetail.setExecuteCount(0);
+                    orderDetail.setSort(i + 1);
+                    orderDetailService.addOrderDetail(orderDetail);
+
+                }
             }
-        }
 
-        deviceOrder.setOrderState(DeviceOrder.UNEXECUTED);
-        deviceOrder.setRemark("初始化成功");
-        deviceOrderService.updateDeviceOrder(deviceOrder);
+            deviceOrder.setOrderState(DeviceOrder.UNEXECUTED);
+            deviceOrder.setRemark("初始化成功");
+            deviceOrderService.updateDeviceOrder(deviceOrder);
+
+        } catch (Exception ex) {
+            try {
+                modifyOrderInfo(deviceOrder, "指令初始化QueryAllParam失败!");
+            } catch (Exception e) {
+                logger.error(ex.getMessage());
+            }
+            logger.error(ex.getMessage());
+        }
     }
 
     private void initSettingFewParamOrder(DeviceOrder deviceOrder) throws SQLException {
 
         //List<DeviceParameter> allDeviceParameter = deviceParameterService.getDeviceParameterByID();
+        try {
+            String[] params = deviceOrder.getParameter().split(";");
 
-        String[] params = deviceOrder.getParameter().split(";");
+            int paramLength = 0;
 
-        int paramLength = 0;
-
-        StringBuilder sbParam = new StringBuilder();
-        for (String param : params) {
-            String[] split = param.split("=");
-            //List<DeviceParameter> parameterList = allDeviceParameter.stream().filter(o -> o.getID() == Integer.parseInt(split[0])).collect(Collectors.toList());
-            DeviceParameter parameter = deviceParameterService.getDeviceParameterByID(Integer.parseInt(split[0]));
-            if (parameter != null) {
-                //2字节参数地址
-                sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress()), 4, '0').toUpperCase());
-
-                StringBuilder sbParamBit = new StringBuilder();
-                Integer endBit = parameter.getEndBit();
-                if (parameter.getParamType() == 2) {
-                    //正负数据类
-                    endBit = 31;
-                }
-                for (int i = 31; i >= 0; i--) {
-                    //
-                    if (i >= parameter.getStartBit() && i <= endBit) {
-                        sbParamBit.append("1");
-                    } else {
-                        sbParamBit.append("0");
-                    }
-                }
-                long decimalNum = Long.parseLong(sbParamBit.toString(), 2); // 先将二进制字符串转换成十进制数值
-                String hexStr = StringUtils.leftPad(Long.toHexString(decimalNum), 8, '0').toUpperCase();
-                //4字节有效参数位
-                sbParam.append(hexStr);
-
-                //IP地址
-                if (isIP(parameter.getRegisterAddress())) {
-                    String[] ipArr = split[2].split("\\.");
-                    if (ipArr.length == 4) {
-                        //4字节参数值
-                        String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[0])), 8, '0');
-                        strBin += StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[1])), 8, '0');
-
-                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
-                        strBin = StringUtils.leftPad(strBin, 32, '0');
-                        sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
-                        paramLength++;
-
-
-                        //2字节参数地址
-                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 1), 4, '0').toUpperCase());
-                        //4字节有效参数位
-                        sbParam.append(hexStr);
-                        //4字节参数值
-                        strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[2])), 8, '0');
-                        strBin += StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[3])), 8, '0');
-                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
-                        strBin = StringUtils.leftPad(strBin, 32, '0');
-                        sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
-                        paramLength++;
-
-                    }
-                } else if (isPhone(parameter.getRegisterAddress())) {
-                    //4字节参数值
-                    String high = split[2].substring(0, split[2].length() - 8);
-                    String low = split[2].substring(split[2].length() - 8);
-
-                    String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(high)), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
-                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
-                    strBin = StringUtils.leftPad(strBin, 32, '0');
-                    sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
-                    paramLength++;
-
+            StringBuilder sbParam = new StringBuilder();
+            for (String param : params) {
+                String[] split = param.split("=");
+                //List<DeviceParameter> parameterList = allDeviceParameter.stream().filter(o -> o.getID() == Integer.parseInt(split[0])).collect(Collectors.toList());
+                DeviceParameter parameter = deviceParameterService.getDeviceParameterByID(Integer.parseInt(split[0]));
+                if (parameter != null) {
                     //2字节参数地址
-                    if (parameter.getRegisterAddress() == 364) {
-                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 1), 4, '0').toUpperCase());
-                    } else {
-                        sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 4), 4, '0').toUpperCase());
-                    }
+                    sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress()), 4, '0').toUpperCase());
 
+                    StringBuilder sbParamBit = new StringBuilder();
+                    Integer endBit = parameter.getEndBit();
+                    if (parameter.getParamType() == 2) {
+                        //正负数据类
+                        endBit = 31;
+                    }
+                    for (int i = 31; i >= 0; i--) {
+                        //
+                        if (i >= parameter.getStartBit() && i <= endBit) {
+                            sbParamBit.append("1");
+                        } else {
+                            sbParamBit.append("0");
+                        }
+                    }
+                    long decimalNum = Long.parseLong(sbParamBit.toString(), 2); // 先将二进制字符串转换成十进制数值
+                    String hexStr = StringUtils.leftPad(Long.toHexString(decimalNum), 8, '0').toUpperCase();
                     //4字节有效参数位
                     sbParam.append(hexStr);
 
-                    strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(low)), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
-                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
-                    strBin = StringUtils.leftPad(strBin, 32, '0');
-                    sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
-                    paramLength++;
+                    //IP地址
+                    if (isIP(parameter.getRegisterAddress())) {
+                        String[] ipArr = split[2].split("\\.");
+                        if (ipArr.length == 4) {
+                            //4字节参数值
+                            String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[0])), 8, '0');
+                            strBin += StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[1])), 8, '0');
 
-                } else if (parameter.getParamType() == 2) {//
-                    //
-                    StringBuilder sb = new StringBuilder();
-                    int paramValue = Integer.parseInt(split[2]);
-                    if (paramValue > 0) {
-                        //
-                        //24 到 31位是符号位，0=正，非0=负，正负数据类--填写数据
-                        for (int i = 0; i < 31 - parameter.getEndBit(); i++) {
-                            sb.append("0");
+                            strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
+                            strBin = StringUtils.leftPad(strBin, 32, '0');
+                            sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
+                            paramLength++;
+
+
+                            //2字节参数地址
+                            sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 1), 4, '0').toUpperCase());
+                            //4字节有效参数位
+                            sbParam.append(hexStr);
+                            //4字节参数值
+                            strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[2])), 8, '0');
+                            strBin += StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(ipArr[3])), 8, '0');
+                            strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
+                            strBin = StringUtils.leftPad(strBin, 32, '0');
+                            sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
+                            paramLength++;
+
                         }
-                    } else {
-                        for (int i = 0; i < 31 - parameter.getEndBit(); i++) {
-                            if (i == 31 - parameter.getEndBit() - 1) {
-                                sb.append("1");
-                            } else {
+                    } else if (isPhone(parameter.getRegisterAddress())) {
+                        //4字节参数值
+                        String high = split[2].substring(0, split[2].length() - 8);
+                        String low = split[2].substring(split[2].length() - 8);
+
+                        String strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(high)), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
+                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
+                        strBin = StringUtils.leftPad(strBin, 32, '0');
+                        sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
+                        paramLength++;
+
+                        //2字节参数地址
+                        if (parameter.getRegisterAddress() == 364) {
+                            sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 1), 4, '0').toUpperCase());
+                        } else {
+                            sbParam.append(StringUtils.leftPad(Integer.toHexString(parameter.getRegisterAddress() + 4), 4, '0').toUpperCase());
+                        }
+
+                        //4字节有效参数位
+                        sbParam.append(hexStr);
+
+                        strBin = StringUtils.leftPad(Integer.toBinaryString(Integer.parseInt(low)), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
+                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
+                        strBin = StringUtils.leftPad(strBin, 32, '0');
+                        sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
+                        paramLength++;
+
+                    } else if (parameter.getParamType() == 2) {//
+                        //
+                        StringBuilder sb = new StringBuilder();
+                        int paramValue = Integer.parseInt(split[2]);
+                        if (paramValue > 0) {
+                            //
+                            //24 到 31位是符号位，0=正，非0=负，正负数据类--填写数据
+                            for (int i = 0; i < 31 - parameter.getEndBit(); i++) {
                                 sb.append("0");
                             }
+                        } else {
+                            for (int i = 0; i < 31 - parameter.getEndBit(); i++) {
+                                if (i == 31 - parameter.getEndBit() - 1) {
+                                    sb.append("1");
+                                } else {
+                                    sb.append("0");
+                                }
+                            }
                         }
+                        paramValue = Math.abs(paramValue);
+                        String strBin = StringUtils.leftPad(Integer.toBinaryString(paramValue), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
+
+                        strBin = sb + strBin;
+                        sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
+                        paramLength++;
+                    } else {
+
+                        int value = parseInt(split[2]);
+                        //4字节参数值
+                        String strBin = StringUtils.leftPad(Integer.toBinaryString(value), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
+
+                        strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
+
+                        strBin = StringUtils.leftPad(strBin, 32, '0');
+                        sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
+                        paramLength++;
                     }
-                    paramValue = Math.abs(paramValue);
-                    String strBin = StringUtils.leftPad(Integer.toBinaryString(paramValue), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
-
-                    strBin = sb + strBin;
-                    sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
-                    paramLength++;
-                } else {
-
-                    int value = parseInt(split[2]);
-                    //4字节参数值
-                    String strBin = StringUtils.leftPad(Integer.toBinaryString(value), parameter.getEndBit() - parameter.getStartBit() + 1, '0');
-
-                    strBin = StringUtils.rightPad(strBin, strBin.length() + parameter.getStartBit(), '0');
-
-                    strBin = StringUtils.leftPad(strBin, 32, '0');
-                    sbParam.append(StringUtils.leftPad(Long.toHexString(Long.parseLong(strBin, 2)), 8, '0').toUpperCase());
-                    paramLength++;
                 }
             }
-        }
 
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("F1030000000000");
-        //报文长度
-        sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + paramLength * 10), 4, '0').toUpperCase());
-        //功能码
-        sb.append("74");
+            StringBuilder sb = new StringBuilder();
+            sb.append("F1030000000000");
+            //报文长度
+            sb.append(StringUtils.leftPad(Integer.toHexString(12 + 1 + paramLength * 10), 4, '0').toUpperCase());
+            //功能码
+            sb.append("74");
 
-        //参数个数
-        sb.append(StringUtils.leftPad(Integer.toHexString(paramLength), 2, '0').toUpperCase());
+            //参数个数
+            sb.append(StringUtils.leftPad(Integer.toHexString(paramLength), 2, '0').toUpperCase());
 
-        sb.append(sbParam);
-        //和校验
-        sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
-        //结束符
-        sb.append("F2");
+            sb.append(sbParam);
+            //和校验
+            sb.append(WXMFProtocolUtil.getSumCheckValue(sb.toString()));
+            //结束符
+            sb.append("F2");
 
-        try {
+
             deviceOrder.setCurMsgIndex(0);
             deviceOrder.setTotalMsgCount(1);
             //0x74 设置单个参数（用于少量参数）
@@ -1148,6 +1158,7 @@ public class MainFrame extends JFrame {
             deviceOrder.setOrderState(DeviceOrder.UNEXECUTED);
             deviceOrder.setRemark("初始化成功");
             deviceOrderService.updateDeviceOrder(deviceOrder);
+
         } catch (SQLException ex) {
             try {
                 modifyOrderInfo(deviceOrder, "指令初始化，添加设置单个参数指令失败!");
@@ -1920,12 +1931,11 @@ public class MainFrame extends JFrame {
     }
 
     private boolean executeQueryHistoryDataOrderDetail(InputStream inputStream, OutputStream outputStream, OrderDetail orderDetail, DeviceOrder deviceOrder, String fileName, int count) throws IOException, SQLException, InterruptedException {
-
+        //指令当前包++
         deviceOrder.setCurMsgIndex(deviceOrder.getCurMsgIndex() + 1);
 
         while (orderDetail.getExecuteCount() < 10) {
             //发送次数加1
-
             orderDetail.setExecuteCount(orderDetail.getExecuteCount() + 1);
             logger.info("开始发送设备(" + deviceOrder.getDeviceID() + ")" + orderDetail.getMsgType() + "指令的第" + orderDetail.getCurPackageNumber() + "包数据" + orderDetail.getMsgContent());
             byte[] sendBytes = CommonUil.hexToByteArray(orderDetail.getMsgContent());
@@ -1942,8 +1952,9 @@ public class MainFrame extends JFrame {
 
                     if (wxmfProtocol.getProtocolData().getResponse().equals("01")) {
                         if (wxmfProtocol.getFunctionCode().equals(orderDetail.getMsgType())) {
+                            //更新设备信息
                             updateDeviceInfo(wxmfProtocol);
-
+                            //保存历史数据
                             if (saveHistoryData(deviceOrder, wxmfProtocol, fileName, count)) {
                                 //数据发送成功
                                 orderDetail.setMsgState(OrderDetail.SUCCEED);
@@ -2010,11 +2021,17 @@ public class MainFrame extends JFrame {
 
             SimpleDateFormat simpleDateFormatTime = new SimpleDateFormat("yyMMddHHmm");
             byte[] dataBytes = wxmfProtocol.getProtocolData().getBytes();
-            Date startTime = simpleDateFormatTime.parse(CommonUil.byteArrayToHexString(dataBytes, 0, 5));
 
+            //5个字节起始时间（年~分BCD码）
+            Date startTime = simpleDateFormatTime.parse(CommonUil.byteArrayToHexString(dataBytes, 0, 5));
+            //1字节存储间隔（01-3C分钟）
             int interval = dataBytes[5] & 0xFF;
+            //1字节数据组数
+            int groupAmount = dataBytes[6] & 0xFF;
+            //1字节通道数量（00-20）
             int channelAmount = dataBytes[7] & 0xFF;
 
+            //首次下载，写入设备基础信息和通道信息
             if (count == 1) {
                 bufferedWriter.write("运维平台下载：");
                 bufferedWriter.newLine();
@@ -2040,13 +2057,15 @@ public class MainFrame extends JFrame {
                 }
                 bufferedWriter.newLine();
             }
-            int groupAmount = dataBytes[6] & 0xFF;
 
             Calendar instance = Calendar.getInstance();
             instance.setTime(startTime);
+
             int index = 8 + channelAmount;
+            //遍历每一组数据
             for (int i = 0; i < groupAmount; i++) {
                 bufferedWriter.write(simpleDateFormat.format(instance.getTime()));
+                //遍历每个通道数据
                 for (int j = 0; j < channelAmount; j++) {
                     String data = CommonUil.byteArrayToHexString(dataBytes, index, index + 4);
                     //String data = CommonUil.byteArrayToHexString(dataBytes, 8 + channelAmount + j * 4, 7 + channelAmount + j * 4 + 5);
@@ -2064,10 +2083,11 @@ public class MainFrame extends JFrame {
 
             String[] split = deviceOrder.getParameter().split("-");
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmm");
+            //数据下载结束时间
             Date endDate = dateFormat.parse(split[1]);
             if (instance.getTime().before(endDate)) {
-                //
-                instance.add(Calendar.MINUTE, interval);
+                //下载未完成
+                //instance.add(Calendar.MINUTE, interval);
                 initQueryHistoryDataOrderAgain(deviceOrder, dateFormat.format(instance.getTime()), split[1]);
             } else {
                 bufferedWriter.write("下载已完成!");
@@ -2449,7 +2469,7 @@ public class MainFrame extends JFrame {
 
         } catch (Exception ex) {
             try {
-                modifyOrderInfo(deviceOrder, "指令初始化失败!");
+                modifyOrderInfo(deviceOrder, "指令初始化UpgradeDeviceOrder失败!");
             } catch (Exception e) {
                 logger.error(ex.getMessage());
             }
@@ -3050,3 +3070,4 @@ public class MainFrame extends JFrame {
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
 }
+
